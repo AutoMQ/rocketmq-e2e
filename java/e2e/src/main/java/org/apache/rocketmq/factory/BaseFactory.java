@@ -17,9 +17,11 @@
 
 package org.apache.rocketmq.factory;
 
+import com.automq.rocketmq.controller.metadata.GrpcControllerClient;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 
 public class BaseFactory {
 
     protected static ClientServiceProvider provider = ClientServiceProvider.loadService();
+    protected static GrpcControllerClient client = new GrpcControllerClient();
 }

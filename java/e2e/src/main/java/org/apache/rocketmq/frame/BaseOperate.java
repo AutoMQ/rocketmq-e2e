@@ -17,6 +17,14 @@
 
 package org.apache.rocketmq.frame;
 
+import apache.rocketmq.controller.v1.CreateGroupReply;
+import apache.rocketmq.controller.v1.CreateGroupRequest;
+import apache.rocketmq.controller.v1.CreateTopicRequest;
+import apache.rocketmq.controller.v1.GroupType;
+import apache.rocketmq.controller.v1.MessageType;
+import com.automq.rocketmq.controller.metadata.GrpcControllerClient;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.util.MQAdmin;
@@ -32,6 +40,8 @@ public class BaseOperate extends ResourceInit {
 
     protected static RPCHook rpcHook;
 
+    protected static GrpcControllerClient client;
+
     static {
         if (aclEnable) {
             log.info("acl enable");
@@ -43,6 +53,7 @@ public class BaseOperate extends ResourceInit {
                 log.info("Shutdown Hook is running !");
             }
         });
+        client = new GrpcControllerClient();
     }
 
     //    //
@@ -69,9 +80,34 @@ public class BaseOperate extends ResourceInit {
     protected static String getTopic(String messageType, String methodName) {
         String topic = String.format("topic_%s_%s_%s", messageType, methodName, RandomUtils.getStringWithCharacter(6));
         log.info("[Topic] topic:{}, messageType:{}, methodName:{}", topic, messageType, methodName);
-        boolean result = MQAdmin.createTopic(cluster, topic, 8, messageType);
-        Assertions.assertTrue(result, String.format("Create topic:%s failed", topic));
-        return topic;
+        try {
+            CreateTopicRequest request = CreateTopicRequest.newBuilder()
+                .setTopic(topic)
+                .setCount(8)
+                .addAcceptMessageTypes(convertMessageType(messageType))
+                .build();
+            Long topicId = client.createTopic(endPoint, request).join();
+            log.info("create topic: {} , topicId:{}", topic, topicId);
+            return topic;
+        } catch (Exception e) {
+            log.error("create topic error", e);
+        }
+        return null;
+    }
+
+    private static MessageType convertMessageType(String typeStr) {
+        switch (typeStr) {
+            case "NORMAL":
+                return MessageType.NORMAL;
+            case "FIFO":
+                return MessageType.FIFO;
+            case "DELAY":
+                return MessageType.DELAY;
+            case "TRANSACTION":
+                return MessageType.TRANSACTION;
+            default:
+                return MessageType.MESSAGE_TYPE_UNSPECIFIED;
+        }
     }
 
     protected static String resetOffsetByTimestamp(String consumerGroup, String topic, long timestamp) {
@@ -107,17 +143,41 @@ public class BaseOperate extends ResourceInit {
     //The synchronization consumption retry policy is DefaultRetryPolicy
     protected static String getGroupId(String methodName) {
         String groupId = String.format("GID_%s_%s", methodName, RandomUtils.getStringWithCharacter(6));
-        log.info("[ConsumerGroupId] groupId:{}, methodName:{}", groupId, methodName);
+        // prepare consumer group
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+            .setName(groupId)
+            .setMaxRetryAttempt(16)
+            .setGroupType(GroupType.GROUP_TYPE_STANDARD)
+            .build();
+        CreateGroupReply reply = createConsumerGroup(request).join();
+        log.info("[ConsumerGroupId] groupId:{} methodName:{} reply:{}", groupId, methodName, reply);
         return groupId;
     }
 
-    //
-//    //The sequential consumption retry policy is FixedRetryPolicy
+    //The sequential consumption retry policy is FixedRetryPolicy
     protected static String getOrderlyGroupId(String methodName) {
         String groupId = String.format("GID_%s_%s", methodName, RandomUtils.getStringWithCharacter(6));
-        log.info("[ConsumerGroupId] groupId:{} methodName:{}", groupId, methodName);
-        MQAdmin.createConsumerGroup(cluster, groupId, 30);
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+            .setName(groupId)
+            .setMaxRetryAttempt(16)
+            .setGroupType(GroupType.GROUP_TYPE_FIFO)
+            .build();
+        CreateGroupReply reply = createConsumerGroup(request).join();
+        log.info("[ConsumerGroupId] groupId:{} methodName:{} reply:{}", groupId, methodName, reply);
         return groupId;
+    }
+
+    private static CompletableFuture<CreateGroupReply> createConsumerGroup(CreateGroupRequest request) {
+        try {
+            CompletableFuture<CreateGroupReply> groupCf = client.createGroup(account.getEndpoint(), request);
+            return groupCf.exceptionally(throwable -> {
+                log.error("Create group failed", throwable);
+                throw new CompletionException(throwable);
+            });
+        } catch (Exception e) {
+            log.error("Create group failed", e);
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
 }

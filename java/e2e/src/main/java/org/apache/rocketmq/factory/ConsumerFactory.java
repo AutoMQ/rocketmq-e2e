@@ -28,8 +28,12 @@ import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
 import org.apache.rocketmq.listener.rmq.RMQNormalListener;
 import org.apache.rocketmq.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConsumerFactory extends BaseFactory {
+
+    private static final Logger log = LoggerFactory.getLogger(ConsumerFactory.class);
 
     public static RMQNormalConsumer getRMQPushConsumer(Account account, String topic, String consumerGroup,
         FilterExpression filterExpression, RMQNormalListener messageListener) {
@@ -109,10 +113,9 @@ public class ConsumerFactory extends BaseFactory {
                 .build();
             TestUtils.waitForSeconds(1);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("start [SimpleConsumer] failed, message: {}", e.getMessage());
             Assertions.fail("start [SimpleConsumer] failed, message: " + e.getMessage());
         }
-
         return simpleConsumer;
     }
 }
