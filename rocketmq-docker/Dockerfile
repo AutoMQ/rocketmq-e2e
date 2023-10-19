@@ -60,6 +60,6 @@ RUN export JAVA_OPT=" -Duser.home=/opt"
 
 WORKDIR ${ROCKETMQ_HOME}/bin
 
-CMD ["sh", "-c", "sh ./bin/run-server.sh com.automq.rocketmq.broker.BrokerStartup -c ./conf/broker.yaml"]
+# CMD ["sh", "-c", "sh ./bin/run-server.sh com.automq.rocketmq.broker.BrokerStartup -c ./conf/broker.yaml"]
 
 
