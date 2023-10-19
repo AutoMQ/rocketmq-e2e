@@ -1,0 +1,58 @@
+# Default values for rocketmq-k8s-helm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+broker:
+  replicaCount: 1
+  image:
+    pullPolicy: IfNotPresent
+    repository: "automqinc/rocketmq_e2e"
+    tag: "latest"
+
+  partition: 0
+  persistence:
+    enabled: false
+    size: 8Gi
+
+  nameOverride: "broker"
+  fullnameOverride: ""
+  namesrvAddr: ""
+
+  conf:
+    clusterNameOverride: ""
+    brokerNamePrefixOverride: ""
+  
+  config: ""
+
+  service:
+    port: 8081
+
+  jvmMemory: " -Xms4g -Xmx4g -Xmn2g -XX:MaxDirectMemorySize=8g "
+  resources:
+    limits:
+      cpu: 2
+      memory: 4Gi
+    requests:
+      cpu: 2
+      memory: 4Gi
+
+  nodeSelector: { }
+
+  tolerations: [ ]
+
+  s3stream:
+    s3WALPath: "/tmp/rocketmq/wal"
+    s3Endpoint: "http://minio.hellocorp.test"
+    s3Bucket: "wxy"
+    s3Region: "us-east-1"
+    s3ForcePathStyle: "true"
+    s3AccessKey: "Y6pKg2MmFL3wlWiEJEtc"
+    s3SecretKey: "eTWpQEutpExoYXebV8D1HXJ8TwDWyoKoAVJpX32K"
+
+
+  db:
+    url: "jdbc:mysql://192.168.123.212:3306/rocketmq"
+    userName: "root"
+    password: "123456"
+
+
