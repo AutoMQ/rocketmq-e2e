@@ -8,7 +8,7 @@
 {{- $db := .Values.broker.db }}
 {{- $replicaCount := .Values.broker.replicaCount | int }}
 {{- range $index := until $replicaCount }}
-  {{ $name }}-{{ $index }}: |
+  {{ $name }}-{{ $clusterName }}: |
     name: {{ $clusterName }}-{{ $brokerNamePrefix }}
     instanceId: {{ $brokerNamePrefix }}-{{ $index }}
     bindAddress: "0.0.0.0:{{ $bindAddress.port }}"
