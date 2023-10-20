@@ -45,8 +45,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "rocketmq-broker.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "rocketmq-broker.name" . }}
+app.kubernetes.io/name: {{ include "rocketmq-broker.fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/cluster: {{ include "rocketmq-broker.clusterName" . }}
 {{- end }}
 
 {{- define "rocketmq-broker.clusterName" -}}
