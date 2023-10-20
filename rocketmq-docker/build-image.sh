@@ -21,4 +21,4 @@ ROCKETMQ_VERSION=$1
 cp -r ../../rocketmq ./
 
 
-docker build --no-cache -f Dockerfile -t apache/rocketmq:${ROCKETMQ_VERSION}-alpine --build-arg version=${ROCKETMQ_VERSION} . --progress=plain
+docker build --no-cache -f Dockerfile -t automqinc/rocketmq:${ROCKETMQ_VERSION}-alpine --build-arg version=${ROCKETMQ_VERSION} . --progress=plain

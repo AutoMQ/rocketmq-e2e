@@ -4,13 +4,14 @@
 {{- $brokerNamePrefix := include "rocketmq-broker.brokerNamePrefix" . }}
 {{- $config := .Values.broker.config }}
 {{- $s3stream := .Values.broker.s3stream }}
+{{- $bindAddress := .Values.broker.service }}
 {{- $db := .Values.broker.db }}
 {{- $replicaCount := .Values.broker.replicaCount | int }}
 {{- range $index := until $replicaCount }}
   {{ $name }}-{{ $index }}: |
     name: {{ $clusterName }}-{{ $brokerNamePrefix }}
     instanceId: {{ $brokerNamePrefix }}-{{ $index }}
-    bindAddress: "0.0.0.0:8081"
+    bindAddress: "0.0.0.0:{{ $bindAddress.port }}"
     s3Stream:
       s3WALPath: {{ $s3stream.s3WALPath }}
       s3Endpoint: {{ $s3stream.s3Endpoint }}
@@ -20,18 +21,17 @@
       s3AccessKey: {{ $s3stream.s3AccessKey }}
       s3SecretKey: {{ $s3stream.s3SecretKey }}
     db:
-      url: {{ $db.dbURL }}
-      userName: {{ $db.dbUserName }}
-      password: {{ $db.dbPassword }}
+      url: {{ $db.url }}
+      userName: {{ $db.userName }}
+      password: {{ $db.password }}
     metrics:
-      exporterType: "PROM"
-      grpcExporterTarget: ""
+      exporterType: "OTLP_GRPC"
+      grpcExporterTarget: "http://10.129.63.127:4317"
       grpcExporterHeader: ""
       grpcExporterTimeOutInMills: 31000
-      grpcExporterIntervalInMills: 60000
+      periodicExporterIntervalInMills: 30000
       promExporterPort: 5557
       promExporterHost: "localhost"
-      loggingExporterIntervalInMills: 10000
       labels: ""
       exportInDelta: false
 {{ $config | indent 4 }}
