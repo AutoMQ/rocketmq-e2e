@@ -51,8 +51,8 @@ broker:
 
 
   db:
-    url: "jdbc:mysql://10.1.0.119:3306/metadata"
+    url: "jdbc:mysql://mysql-server:3306/metadata"
     userName: "root"
-    password: "root"
+    password: "password"
 
 
