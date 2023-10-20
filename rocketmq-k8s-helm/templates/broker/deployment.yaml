@@ -19,7 +19,7 @@ spec:
           imagePullPolicy: {{ $.Values.broker.image.pullPolicy }}
         {{- end }}
           command: [ "/bin/sh" ]
-          args: [ "-c", "./run-server.sh com.automq.rocketmq.broker.BrokerStartup -c /home/rocketmq/conf/$(POD_NAME)" ]
+          args: [ "-c", "./run-server.sh com.automq.rocketmq.broker.BrokerStartup -c /home/rocketmq/rocketmq-on-s3-5.1.3/conf/rocketmq-on-s3-broker-0" ]
           env:
             - name: POD_NAME
               valueFrom:
@@ -33,32 +33,31 @@ spec:
               value: {{ .Values.broker.jvmMemory }}
           ports:
             - name: broker
-              containerPort: 10911
+              containerPort: 8081
               protocol: TCP
-          readinessProbe:
-            failureThreshold: 3
-            initialDelaySeconds: 60
-            periodSeconds: 15
-            successThreshold: 1
-            tcpSocket:
-              port: 10911
-            timeoutSeconds: 1
-          livenessProbe:
-            failureThreshold: 3
-            initialDelaySeconds: 60
-            periodSeconds: 15
-            successThreshold: 1
-            tcpSocket:
-              port: 10911
-            timeoutSeconds: 1
+          # readinessProbe:
+          #   failureThreshold: 3
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 15
+          #   successThreshold: 1
+          #   tcpSocket:
+          #     port: 8081
+          #   timeoutSeconds: 1
+          # livenessProbe:
+          #   failureThreshold: 3
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 15
+          #   successThreshold: 1
+          #   tcpSocket:
+          #     port: 8081
+          #   timeoutSeconds: 1
           resources:
             {{- toYaml .Values.broker.resources | nindent 12 }}
           volumeMounts:
-            - mountPath: /home/rocketmq/conf
+            - mountPath: /home/rocketmq/rocketmq-on-s3-5.1.3/conf
               name: broker-config
-            # - mountPath: /home/rocketmq/logs
-            #   name: broker-storage
-            #   subPath: home/rocketmq/rocketmq-broker
+            - mountPath: /root/logs/rocketmqlogs/
+              name: broker-storage
       {{- with .Values.broker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -67,3 +66,7 @@ spec:
         - name: broker-config
           configMap:
             name: broker-conf
+        - name: broker-storage
+          hostPath:
+            path: /root/logs/rocketmqlogs
+            type: DirectoryOrCreate

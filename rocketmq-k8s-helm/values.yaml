@@ -6,8 +6,8 @@ broker:
   replicaCount: 1
   image:
     pullPolicy: IfNotPresent
-    repository: "automqinc/rocketmq_e2e"
-    tag: "latest"
+    repository: "automqinc/rocketmq"
+    tag: "5.1.3-alpine"
 
   partition: 0
   persistence:
@@ -41,18 +41,18 @@ broker:
   tolerations: [ ]
 
   s3stream:
-    s3WALPath: "/tmp/rocketmq/wal"
+    s3WALPath: "/tmp/s3rocketmq/wal"
     s3Endpoint: "http://minio.hellocorp.test"
     s3Bucket: "wxy"
     s3Region: "us-east-1"
-    s3ForcePathStyle: "true"
+    s3ForcePathStyle: true
     s3AccessKey: "Y6pKg2MmFL3wlWiEJEtc"
     s3SecretKey: "eTWpQEutpExoYXebV8D1HXJ8TwDWyoKoAVJpX32K"
 
 
   db:
-    url: "jdbc:mysql://192.168.123.212:3306/rocketmq"
+    url: "jdbc:mysql://10.1.0.119:3306/metadata"
     userName: "root"
-    password: "123456"
+    password: "root"
 
 
