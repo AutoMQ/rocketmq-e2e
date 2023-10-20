@@ -14,14 +14,18 @@
 # limitations under the License.
 
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "rocketmq-broker.fullname" . }}
 spec:
   replicas: {{ .Values.broker.replicaCount }}
+  serviceName: {{ include "rocketmq-broker.fullname" . }}
   selector:
     matchLabels:
       {{- include "rocketmq-broker.selectorLabels" . | nindent 6 }}
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -34,7 +38,7 @@ spec:
           imagePullPolicy: {{ $.Values.broker.image.pullPolicy }}
         {{- end }}
           command: [ "/bin/sh" ]
-          args: [ "-c", "./run-server.sh com.automq.rocketmq.broker.BrokerStartup -c /home/rocketmq/rocketmq-on-s3-5.1.3/conf/$(INSTANCE_NAME)-$(CLUSTER_NAME)" ]
+          args: [ "-c", "./run-server.sh com.automq.rocketmq.broker.BrokerStartup -c /home/rocketmq/rocketmq-on-s3-5.1.3/conf/$(CLUSTER_NAME)-$(POD_NAME)" ]
           env:
             - name: POD_NAME
               valueFrom:
