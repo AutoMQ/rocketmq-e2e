@@ -23,6 +23,7 @@ limitations under the License.
 {{- $config := .Values.broker.config }}
 {{- $s3stream := .Values.broker.s3stream }}
 {{- $bindAddress := .Values.broker.service }}
+{{- $innerKey := .Values.broker.inner }}
 {{- $db := .Values.broker.db }}
 {{- $replicaCount := .Values.broker.replicaCount | int }}
 {{- range $index := until $replicaCount }}
@@ -30,6 +31,8 @@ limitations under the License.
     name: {{ $clusterName }}-{{ $brokerNamePrefix }}-{{ $index }}
     instanceId: {{ $brokerNamePrefix }}-{{ $index }}
     bindAddress: "0.0.0.0:{{ $bindAddress.port }}"
+    innerAccessKey: {{ $innerKey.accessKey }}
+    innerSecretKey: {{ $innerKey.secretKey }}
     s3Stream:
       s3WALPath: {{ $s3stream.s3WALPath }}
       s3Endpoint: {{ $s3stream.s3Endpoint }}
