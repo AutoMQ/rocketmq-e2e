@@ -27,7 +27,7 @@ limitations under the License.
 {{- $replicaCount := .Values.broker.replicaCount | int }}
 {{- range $index := until $replicaCount }}
   {{ $clusterName }}-{{ $name }}-{{ $index }}: |
-    name: {{ $clusterName }}-{{ $brokerNamePrefix }}
+    name: {{ $clusterName }}-{{ $brokerNamePrefix }}-{{ $index }}
     instanceId: {{ $brokerNamePrefix }}-{{ $index }}
     bindAddress: "0.0.0.0:{{ $bindAddress.port }}"
     s3Stream:

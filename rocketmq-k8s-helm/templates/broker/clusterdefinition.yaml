@@ -1,0 +1,89 @@
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: ClusterDefinition
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "rocketmq-broker.selectorLabels" . | nindent 8 }}
+spec:
+  type: rocketmq-on-s3
+  componentDefs:
+    - name: rocketmq-on-s3
+      description: |-
+        Rocketmq broker that act as both brokers and controllers are referred to as "combined" servers.
+      workloadType: Stateful # Consensus
+      characterType: rocketmq-broker
+      probes:
+      monitor:
+      configSpecs:
+{{/*        - name: broker-config*/}}
+{{/*          configMap:*/}}
+{{/*            name: broker-conf*/}}
+{{/*        - name: broker-storage*/}}
+{{/*          hostPath:*/}}
+{{/*            path: /root/logs/rocketmqlogs*/}}
+{{/*            type: DirectoryOrCreate*/}}
+      scriptSpecs:
+      service:
+        ports:
+          - name: rocketmq-broker
+            targetPort: rocketmq-broker
+            port: 8081
+      podSpec:
+        securityContext:
+          fsGroup: 1001
+        containers:
+          - name: rocketmq
+            command: [ "/bin/sh" ]
+            args: [ "-c", "./run-server.sh com.automq.rocketmq.broker.BrokerStartup -c /home/rocketmq/rocketmq-on-s3-5.1.3/conf/broker/$(CLUSTER_NAME)-$(POD_NAME)" ]
+            env:
+              - name: POD_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: CLUSTER_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['app.kubernetes.io/cluster']
+              - name: INSTANCE_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['app.kubernetes.io/name']
+              - name: POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+              - name: BROKER_MEM
+                value: {{ .Values.broker.jvmMemory }}
+            ports:
+              - name: rocketmq-broker
+                containerPort: 8081
+                protocol: TCP
+            readinessProbe:
+              failureThreshold: 3
+              initialDelaySeconds: 60
+              periodSeconds: 15
+              successThreshold: 1
+              tcpSocket:
+                port: rocketmq-broker
+              timeoutSeconds: 1
+            livenessProbe:
+              failureThreshold: 3
+              initialDelaySeconds: 60
+              periodSeconds: 15
+              successThreshold: 1
+              timeoutSeconds: 5
+              tcpSocket:
+                port: rocketmq-broker
+            startupProbe:
+              failureThreshold: 30
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 5
+              tcpSocket:
+                port: rocketmq-broker
+            volumeMounts:
+              - mountPath: /home/rocketmq/rocketmq-on-s3-5.1.3/conf/broker
+                name: broker-config
+              - mountPath: /root/logs/rocketmqlogs
+                name: broker-storage

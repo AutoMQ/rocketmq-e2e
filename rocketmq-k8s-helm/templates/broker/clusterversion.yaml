@@ -1,0 +1,19 @@
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: ClusterVersion
+metadata:
+  name: {{ include "rocketmq-broker.fullname" . }}-{{ default .Chart.AppVersion .Values.clusterVersionOverride }}
+  labels:
+    {{- include "rocketmq-broker.selectorLabels" . | nindent 8 }}
+spec:
+  clusterDefinitionRef: {{ .Release.Name }}
+  componentVersions:
+    - componentDefRef: rocketmq-on-s3
+      versionsContext:
+        containers:
+          - name: rocketmq-on-s3
+            image: {{ .Values.broker.image.repository }}:{{ .Values.broker.image.tag | default .Chart.AppVersion }}
+            imagePullPolicy: {{ default "IfNotPresent" .Values.broker.image.pullPolicy }}
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1001
