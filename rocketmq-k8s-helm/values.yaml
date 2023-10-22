@@ -21,7 +21,7 @@ broker:
   replicaCount: 1
   image:
     pullPolicy: IfNotPresent
-    repository: "automqinc/rocketmq"
+    repository: "automqinc/rocketmq_e2e"
     tag: "5.1.3-alpine"
 
   partition: 0
