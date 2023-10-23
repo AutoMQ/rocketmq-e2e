@@ -28,7 +28,7 @@ limitations under the License.
 {{- $replicaCount := .Values.broker.replicaCount | int }}
 {{- range $index := until $replicaCount }}
   {{ $clusterName }}-{{ $name }}-{{ $index }}: |
-    name: {{ $clusterName }}-{{ $brokerNamePrefix }}-{{ $index }}
+    name: {{ $clusterName }}-{{ $name }}-{{ $index }}
     instanceId: {{ $brokerNamePrefix }}-{{ $index }}
     bindAddress: "0.0.0.0:{{ $bindAddress.port }}"
     innerAccessKey: {{ $innerKey.accessKey }}
