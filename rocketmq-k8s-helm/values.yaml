@@ -18,6 +18,7 @@
 # Declare variables to be passed into your templates.
 
 broker:
+  namespace: default
   replicaCount: 1
   image:
     pullPolicy: Always
