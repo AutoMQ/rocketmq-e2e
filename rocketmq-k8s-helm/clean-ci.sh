@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -12,26 +14,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+NAMESPACE=$1
 
-enableStartupScripts: true
+if [[ -z $NAMESPACE ]]; then
+  NAMESPACE="default"
+  echo "info: NAMESPACE is empty, use default namespace: $NAMESPACE"
+fi
 
-service:
-  type: ClusterIP
+helm uninstall s3-localstack --namespace $NAMESPACE
+helm uninstall mysql --namespace $NAMESPACE
+helm uninstall rocketmq-on-s3 --namespace $NAMESPACE
 
-startupScriptContent: |
-    #!/bin/bash
-    set -e
-    export TERM=ansi
-    export AWS_ACCESS_KEY_ID=foot
-    export AWS_SECRET_ACCESS_KEY=bar
-    export AWS_DEFAULT_REGION=eu-west-2
-    export AWS_DEFAULT_BUCKETS=ros
-    export AWS_S3_ENDPOINT=http://localhost:4566
-    export PAGER=
-
-    echo "S3 Configuration started"
-
-    aws --endpoint-url=$AWS_S3_ENDPOINT s3 mb s3://$AWS_DEFAULT_BUCKETS
-    aws --endpoint-url=$AWS_S3_ENDPOINT s3 cp /tmp/localstack/test-data/ s3://$AWS_DEFAULT_BUCKETS/chart --recursive
-
-    echo "S3 Configured"
+kubectl delete -f deploy/init-db-configmap.yaml --namespace $NAMESPACE
