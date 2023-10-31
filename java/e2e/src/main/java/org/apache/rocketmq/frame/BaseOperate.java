@@ -22,7 +22,9 @@ import apache.rocketmq.controller.v1.CreateGroupRequest;
 import apache.rocketmq.controller.v1.CreateTopicRequest;
 import apache.rocketmq.controller.v1.GroupType;
 import apache.rocketmq.controller.v1.MessageType;
+import apache.rocketmq.controller.v1.AcceptTypes;
 import com.automq.rocketmq.controller.metadata.GrpcControllerClient;
+import com.automq.rocketmq.cli.CliClientConfig;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
@@ -53,7 +55,7 @@ public class BaseOperate extends ResourceInit {
                 log.info("Shutdown Hook is running !");
             }
         });
-        client = new GrpcControllerClient();
+        client = new GrpcControllerClient(new CliClientConfig());
     }
 
     //    //
@@ -84,7 +86,7 @@ public class BaseOperate extends ResourceInit {
             CreateTopicRequest request = CreateTopicRequest.newBuilder()
                 .setTopic(topic)
                 .setCount(8)
-                .addAcceptMessageTypes(convertMessageType(messageType))
+                .setAcceptTypes(convertAcceptTypes(messageType))
                 .build();
             Long topicId = client.createTopic(endPoint, request).join();
             log.info("create topic: {} , topicId:{}", topic, topicId);
@@ -95,18 +97,18 @@ public class BaseOperate extends ResourceInit {
         return null;
     }
 
-    private static MessageType convertMessageType(String typeStr) {
+    private static AcceptTypes convertAcceptTypes(String typeStr) {
         switch (typeStr) {
             case "NORMAL":
-                return MessageType.NORMAL;
+                return AcceptTypes.newBuilder().addTypes(MessageType.NORMAL).build();
             case "FIFO":
-                return MessageType.FIFO;
+                return AcceptTypes.newBuilder().addTypes(MessageType.FIFO).build();
             case "DELAY":
-                return MessageType.DELAY;
+                return AcceptTypes.newBuilder().addTypes(MessageType.DELAY).build();
             case "TRANSACTION":
-                return MessageType.TRANSACTION;
+                return AcceptTypes.newBuilder().addTypes(MessageType.TRANSACTION).build();
             default:
-                return MessageType.MESSAGE_TYPE_UNSPECIFIED;
+                return AcceptTypes.newBuilder().addTypes(MessageType.MESSAGE_TYPE_UNSPECIFIED).build();
         }
     }
 
