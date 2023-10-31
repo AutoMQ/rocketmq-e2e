@@ -148,7 +148,7 @@ public class BaseOperate extends ResourceInit {
         // prepare consumer group
         CreateGroupRequest request = CreateGroupRequest.newBuilder()
             .setName(groupId)
-            .setMaxRetryAttempt(16)
+            .setMaxDeliveryAttempt(16)
             .setGroupType(GroupType.GROUP_TYPE_STANDARD)
             .build();
         CreateGroupReply reply = createConsumerGroup(request).join();
@@ -161,7 +161,7 @@ public class BaseOperate extends ResourceInit {
         String groupId = String.format("GID_%s_%s", methodName, RandomUtils.getStringWithCharacter(6));
         CreateGroupRequest request = CreateGroupRequest.newBuilder()
             .setName(groupId)
-            .setMaxRetryAttempt(16)
+            .setMaxDeliveryAttempt(16)
             .setGroupType(GroupType.GROUP_TYPE_FIFO)
             .build();
         CreateGroupReply reply = createConsumerGroup(request).join();
