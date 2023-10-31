@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -15,11 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-ROCKETMQ_VERSION=$1
-ROCKETMQ_REPO=$2
-
-cp -r ../../rocketmq ./
-
-
-docker build --no-cache -f Dockerfile -t ${ROCKETMQ_REPO}:${ROCKETMQ_VERSION} --build-arg version=${ROCKETMQ_VERSION} . --progress=plain
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rocketmq-broker.fullname" . }}
+  labels:
+    {{- include "rocketmq-broker.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.broker.service.port }}
+      targetPort: broker-port
+      protocol: TCP
+      name: broker-port
+  selector:
+    {{- include "rocketmq-broker.selectorLabels" . | nindent 4 }}
+  clusterIP: None

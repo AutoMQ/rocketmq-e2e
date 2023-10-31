@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -14,12 +14,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+NAMESPACE=$1
 
+if [[ -z $NAMESPACE ]]; then
+  NAMESPACE="default"
+  echo "info: NAMESPACE is empty, use default namespace: $NAMESPACE"
+fi
 
-ROCKETMQ_VERSION=$1
-ROCKETMQ_REPO=$2
+helm uninstall s3-localstack --namespace $NAMESPACE
+helm uninstall mysql --namespace $NAMESPACE
+helm uninstall rocketmq-on-s3 --namespace $NAMESPACE
 
-cp -r ../../rocketmq ./
-
-
-docker build --no-cache -f Dockerfile -t ${ROCKETMQ_REPO}:${ROCKETMQ_VERSION} --build-arg version=${ROCKETMQ_VERSION} . --progress=plain
+kubectl delete -f deploy/init-db-configmap.yaml --namespace $NAMESPACE

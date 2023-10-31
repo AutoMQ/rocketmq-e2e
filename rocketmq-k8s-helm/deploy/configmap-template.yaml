@@ -13,21 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-broker:
-  replicaCount: 2
-  conf:
-    clusterNameOverride: "automq"
-  s3stream:
-    s3WALPath: "/tmp/s3rocketmq/wal"
-    s3Endpoint: "http://minio.hellocorp.test"
-    s3Bucket: "wxy"
-    s3Region: "us-east-1"
-    s3ForcePathStyle: true
-    s3AccessKey: "Y6pKg2MmFL3wlWiEJEtc"
-    s3SecretKey: "eTWpQEutpExoYXebV8D1HXJ8TwDWyoKoAVJpX32K"
-
-
-  db:
-    url: "jdbc:mysql://10.1.0.119:3306/metadata"
-    userName: "root"
-    password: "root"
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+data:
+  initdb.sql: |
+    use metadata;
