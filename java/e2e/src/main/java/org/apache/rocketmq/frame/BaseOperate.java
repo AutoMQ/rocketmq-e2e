@@ -169,6 +169,7 @@ public class BaseOperate extends ResourceInit {
             .setName(groupId)
             .setMaxDeliveryAttempt(16)
             .setGroupType(GroupType.GROUP_TYPE_FIFO)
+            .setSubMode(SubscriptionMode.SUB_MODE_POP)
             .build();
         CreateGroupReply reply = createConsumerGroup(request).join();
         log.info("[ConsumerGroupId] groupId:{} methodName:{} reply:{}", groupId, methodName, reply);

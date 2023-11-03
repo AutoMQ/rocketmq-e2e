@@ -42,13 +42,23 @@
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-acl</artifactId>
-            <version>${rocketmq.client.version}</version>
+            <version>5.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>protobuf-java</artifactId>
+                    <groupId>com.google.protobuf</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>protobuf-java-util</artifactId>
+                    <groupId>com.google.protobuf</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-tools</artifactId>
-            <version>${rocketmq.client.version}</version>
+            <version>5.0.0</version>
         </dependency>
 
         <!--junit5-->
@@ -89,9 +99,30 @@
             <version>1.3.0-beta0</version>
         </dependency>
         <dependency>
+            <groupId>com.automq.rocketmq</groupId>
+            <artifactId>rocketmq-controller</artifactId>
+            <version>5.1.3-automq-0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.automq.rocketmq</groupId>
+            <artifactId>rocketmq-cli</artifactId>
+            <version>5.1.3-automq-0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.automq.rocketmq</groupId>
+            <artifactId>rocketmq-proto</artifactId>
+            <version>5.1.3-automq-0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>4.0.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.automq.rocketmq</groupId>
+            <artifactId>rocketmq-common</artifactId>
+            <version>5.1.3-automq-0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
