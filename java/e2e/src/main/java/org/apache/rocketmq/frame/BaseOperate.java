@@ -24,7 +24,7 @@ import apache.rocketmq.controller.v1.GroupType;
 import apache.rocketmq.controller.v1.MessageType;
 import apache.rocketmq.controller.v1.AcceptTypes;
 import apache.rocketmq.controller.v1.SubscriptionMode;
-import com.automq.rocketmq.controller.metadata.GrpcControllerClient;
+import com.automq.rocketmq.controller.client.GrpcControllerClient;
 import com.automq.rocketmq.cli.CliClientConfig;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;

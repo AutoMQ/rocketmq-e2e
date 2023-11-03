@@ -17,7 +17,7 @@
 
 package org.apache.rocketmq.factory;
 
-import com.automq.rocketmq.controller.metadata.GrpcControllerClient;
+import com.automq.rocketmq.controller.client.GrpcControllerClient;
 import com.automq.rocketmq.cli.CliClientConfig;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 
