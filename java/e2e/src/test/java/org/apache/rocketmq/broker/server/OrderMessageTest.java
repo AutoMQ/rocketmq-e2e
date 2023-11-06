@@ -18,11 +18,17 @@
 package org.apache.rocketmq.broker.server;
 
 import java.time.Duration;
+import java.util.Collections;
+
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.apis.message.Message;
+import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
+import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
 import org.apache.rocketmq.client.rmq.RMQNormalProducer;
 import org.apache.rocketmq.common.attribute.TopicMessageType;
+import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.enums.TESTSET;
 import org.apache.rocketmq.factory.ConsumerFactory;
 import org.apache.rocketmq.factory.MessageFactory;
@@ -32,6 +38,7 @@ import org.apache.rocketmq.listener.rmq.RMQNormalListener;
 import org.apache.rocketmq.util.NameUtils;
 import org.apache.rocketmq.util.RandomUtils;
 import org.apache.rocketmq.util.VerifyUtils;
+import org.apache.rocketmq.util.data.collect.DataCollector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,10 +82,10 @@ public class OrderMessageTest extends BaseOperate {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
 
         String topic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
-        String groupId = getOrderlyGroupId(methodName);
+        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
+        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
         VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
@@ -89,7 +96,9 @@ public class OrderMessageTest extends BaseOperate {
             producer.send(message);
         }
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
-        VerifyUtils.verifyOrderMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages());
+        DataCollector<Object> dequeueMessages = simpleConsumer.getListener().getDequeueMessages();
+        dequeueMessages.addData(pushConsumer.getListener().getDequeueMessages());
+        VerifyUtils.verifyOrderMessage(producer.getEnqueueMessages(), dequeueMessages);
     }
 
 }

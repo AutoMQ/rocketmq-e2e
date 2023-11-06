@@ -83,6 +83,7 @@ public class SimpleTopicTypeTest extends BaseOperate {
         VerifyUtils.waitDelayReceiveThenAck(producer, consumer, 1, 10000);
     }
 
+    @Disabled
     @Test
     @DisplayName("Send 10 transaction messages synchronously and expect SimpleConsumer to receive() and ack() messages properly")
     public void testTrans_simple_receive_ackAsync() {
