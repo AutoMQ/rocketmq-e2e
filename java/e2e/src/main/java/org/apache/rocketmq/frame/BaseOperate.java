@@ -176,6 +176,19 @@ public class BaseOperate extends ResourceInit {
         return groupId;
     }
 
+    protected static String getOrderlyGroupId(String methodName, SubscriptionMode mode) {
+        String groupId = String.format("GID_%s_%s", methodName, RandomUtils.getStringWithCharacter(6));
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+            .setName(groupId)
+            .setMaxDeliveryAttempt(16)
+            .setGroupType(GroupType.GROUP_TYPE_FIFO)
+            .setSubMode(mode)
+            .build();
+        CreateGroupReply reply = createConsumerGroup(request).join();
+        log.info("[ConsumerGroupId] groupId:{} methodName:{} reply:{}", groupId, methodName, reply);
+        return groupId;
+    }
+
     private static CompletableFuture<CreateGroupReply> createConsumerGroup(CreateGroupRequest request) {
         try {
             CompletableFuture<CreateGroupReply> groupCf = client.createGroup(account.getEndpoint(), request);

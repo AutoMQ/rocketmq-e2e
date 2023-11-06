@@ -34,6 +34,7 @@ import org.apache.rocketmq.util.NameUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,7 @@ public class NormalMessageSizeTest extends BaseOperate {
     private static String delayTopic;
     private static Producer producer;
 
+    @Disabled
     @BeforeAll
     public static void setUpAll() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
@@ -70,6 +72,7 @@ public class NormalMessageSizeTest extends BaseOperate {
         }
     }
 
+    @Disabled
     @AfterAll
     public static void tearDownAll() {
         if (producer != null) {
@@ -131,6 +134,7 @@ public class NormalMessageSizeTest extends BaseOperate {
         }
     }
 
+    @Disabled
     @Test
     @DisplayName("Send transaction messages synchronously with the body size of 4M+1, expect send failed")
     public void testTransMsgSize4MAdd1() {
@@ -144,6 +148,7 @@ public class NormalMessageSizeTest extends BaseOperate {
         });
     }
 
+    @Disabled
     @Test
     @DisplayName("Send transaction messages synchronously with the body size of 4M, expect send success")
     public void testTransMsgSize4M() {

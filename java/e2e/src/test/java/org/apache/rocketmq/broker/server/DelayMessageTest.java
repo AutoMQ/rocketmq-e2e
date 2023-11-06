@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.broker.server;
 
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.apis.message.Message;
 import org.apache.rocketmq.client.java.exception.BadRequestException;
@@ -81,7 +82,7 @@ public class DelayMessageTest extends BaseOperate {
     public void testDelay_Send_PushConsume() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         String topic = getTopic(TopicMessageType.DELAY.getValue(), methodName);
-        String groupId = getGroupId(methodName);
+        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
         simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
@@ -102,9 +103,9 @@ public class DelayMessageTest extends BaseOperate {
     public void testDelay_SendAsync_PushConsume() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         String topic = getTopic(TopicMessageType.DELAY.getValue(), methodName);
-        String groupId = getGroupId(methodName);
+        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
+        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(2));
         VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
@@ -128,10 +129,10 @@ public class DelayMessageTest extends BaseOperate {
     public void testDelayTime15SecondsAgo() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         String topic = getTopic(TopicMessageType.DELAY.getValue(), methodName);
-        String groupId = getGroupId(methodName);
+        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
+        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
         VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
