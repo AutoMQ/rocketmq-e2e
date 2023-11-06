@@ -26,7 +26,6 @@ import apache.rocketmq.controller.v1.MessageType;
 import apache.rocketmq.controller.v1.SubscriptionMode;
 import com.automq.rocketmq.cli.CliClientConfig;
 import com.automq.rocketmq.controller.client.GrpcControllerClient;
-import org.apache.rocketmq.common.attribute.TopicMessageType;
 import org.apache.rocketmq.utils.MQAdmin;
 import org.apache.rocketmq.utils.RandomUtils;
 import org.slf4j.Logger;
@@ -41,20 +40,26 @@ public class BaseOperate extends ResourceInit {
     protected static GrpcControllerClient client;
 
     static {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                MQAdmin.mqAdminExt.shutdown();
-                logger.info("Shutdown Hook is running !");
-            }
-        });
-        client = new GrpcControllerClient(new CliClientConfig());
+        try {
+            client = new GrpcControllerClient(new CliClientConfig());
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    MQAdmin.mqAdminExt.shutdown();
+                    logger.info("Shutdown Hook is running !");
+                }
+            });
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
     }
 
     protected static String getTopic(String methodName) {
-        return getTopic(TopicMessageType.NORMAL.getValue(), methodName);
+        return getTopic(MessageType.NORMAL, methodName);
     }
 
-    protected static String getTopic(String messageType, String methodName) {
+    protected static String getTopic(MessageType messageType, String methodName) {
         String topic = String.format("topic_%s_%s", methodName, RandomUtils.getStringWithCharacter(6));
         logger.info("[Topic] topic:{}, methodName:{}", topic, methodName);
         try {
@@ -72,19 +77,8 @@ public class BaseOperate extends ResourceInit {
         return topic;
     }
 
-    private static AcceptTypes convertAcceptTypes(String typeStr) {
-        switch (typeStr) {
-            case "NORMAL":
-                return AcceptTypes.newBuilder().addTypes(MessageType.NORMAL).build();
-            case "FIFO":
-                return AcceptTypes.newBuilder().addTypes(MessageType.FIFO).build();
-            case "DELAY":
-                return AcceptTypes.newBuilder().addTypes(MessageType.DELAY).build();
-            case "TRANSACTION":
-                return AcceptTypes.newBuilder().addTypes(MessageType.TRANSACTION).build();
-            default:
-                return AcceptTypes.newBuilder().addTypes(MessageType.MESSAGE_TYPE_UNSPECIFIED).build();
-        }
+    private static AcceptTypes convertAcceptTypes(MessageType messageType) {
+        return AcceptTypes.newBuilder().addTypes(messageType).build();
     }
 
     protected static String getGroupId(String methodName) {
