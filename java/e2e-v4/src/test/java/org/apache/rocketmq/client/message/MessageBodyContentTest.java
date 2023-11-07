@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.client.message;
 
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
 import org.apache.rocketmq.client.rmq.RMQNormalProducer;
 import org.apache.rocketmq.enums.TESTSET;
@@ -89,8 +90,8 @@ public class MessageBodyContentTest extends BaseOperate {
     @DisplayName("Send normal message, setting message body with chinese character, expect consume success")
     public void testMessageBodyContentIsChinese() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        String groupId = getGroupId(methodName);
 
+        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
         pushConsumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         pushConsumer.subscribeAndStart(topic, tag, new RMQNormalListener());
 
@@ -108,7 +109,7 @@ public class MessageBodyContentTest extends BaseOperate {
     @DisplayName("Send normal message, setting message body with emoji(😱) character, expect consume success ")
     public void testMessageBodyContentIsEmoji() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        String groupId = getGroupId(methodName);
+        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
 
         pushConsumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         pushConsumer.subscribeAndStart(topic, tag, new RMQNormalListener());

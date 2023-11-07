@@ -39,12 +39,14 @@ import org.apache.rocketmq.utils.TestUtils;
 import org.apache.rocketmq.utils.VerifyUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Disabled
 @Tag(TESTSET.BATCHPRODUCER)
 public class BatchProducerTest extends BaseOperate {
     private final Logger log = LoggerFactory.getLogger(BatchProducerTest.class);

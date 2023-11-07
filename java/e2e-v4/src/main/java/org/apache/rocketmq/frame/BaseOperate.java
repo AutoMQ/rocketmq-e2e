@@ -82,7 +82,7 @@ public class BaseOperate extends ResourceInit {
     }
 
     protected static String getGroupId(String methodName) {
-        return getGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
+        return getGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
     }
 
     protected static String getGroupId(String methodName, SubscriptionMode mode) {

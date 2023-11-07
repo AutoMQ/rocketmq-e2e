@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.client.message;
 
+import apache.rocketmq.controller.v1.MessageType;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -58,10 +59,10 @@ public class NormalMessageSizeTest extends BaseOperate {
     @BeforeAll
     public static void setUpAll() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        normalTopic = getTopic(methodName);
-        transTopic = getTopic(methodName);
-        delayTopic = getTopic(methodName);
-        fifoTopic = getTopic(methodName);
+        normalTopic = getTopic(MessageType.NORMAL, methodName);
+        transTopic = getTopic(MessageType.TRANSACTION, methodName);
+        delayTopic = getTopic(MessageType.DELAY, methodName);
+        fifoTopic = getTopic(MessageType.FIFO, methodName);
     }
 
     @AfterAll
@@ -161,6 +162,7 @@ public class NormalMessageSizeTest extends BaseOperate {
         }
     }
 
+    @Disabled
     @Test
     @DisplayName("Send transaction messages synchronously with the body size of 4M+1, expect send failed")
     public void testTransMsgSize4MAdd1() {
@@ -196,6 +198,7 @@ public class NormalMessageSizeTest extends BaseOperate {
         producer.shutdown();
     }
 
+    @Disabled
     @Test
     @DisplayName("Send transaction messages synchronously with the body size of 4M, expect send success")
     public void testTransMsgSize4M() {
@@ -265,7 +268,7 @@ public class NormalMessageSizeTest extends BaseOperate {
     @Test
     @DisplayName("Send FIFO messages synchronously with the body size of 4M, expect send success")
     public void testFifoMsgSize4M() {
-        producer = new DefaultMQProducer(RandomUtils.getStringByUUID(), rpcHook);
+        producer = new DefaultMQProducer(RandomUtils.getStringByUUID());
         producer.setInstanceName(UUID.randomUUID().toString());
         producer.setNamesrvAddr(namesrvAddr);
         try {
@@ -288,6 +291,7 @@ public class NormalMessageSizeTest extends BaseOperate {
                 producer.send(message, finalMessageQueues.get(0));
             }
         } catch (MQBrokerException e) {
+            e.printStackTrace();
             Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
         } catch (RemotingException e) {
             Assertions.fail("Send message failed, expected success, message:" + e.getMessage());

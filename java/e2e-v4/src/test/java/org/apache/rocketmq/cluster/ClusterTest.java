@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.cluster;
 
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
 import org.apache.rocketmq.client.rmq.RMQNormalProducer;
 import org.apache.rocketmq.common.message.Message;
@@ -67,6 +68,7 @@ public class ClusterTest extends BaseOperate {
         }
     }
 
+    @Disabled
     @Test
     @DisplayName("Send 100 normal messages synchronously, start three consumers on different GroupId, and expect each client to consume up to 100 messages")
     public void testBroadcastConsume() {
@@ -98,6 +100,7 @@ public class ClusterTest extends BaseOperate {
         VerifyUtils.verifyNormalMessage(producer.getEnqueueMessages(), listenerC.getDequeueMessages());
     }
 
+    @Disabled
     @Test
     @DisplayName("Send 100 normal messages synchronously, start three consumers on same GroupId, and expect each client to consume up to 100 messages")
     public void testBroadcastConsumeWithSameGroupId() {

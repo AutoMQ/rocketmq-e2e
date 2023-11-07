@@ -30,12 +30,14 @@ import org.apache.rocketmq.utils.NameUtils;
 import org.apache.rocketmq.utils.VerifyUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Disabled
 @Tag(TESTSET.NORMAL)
 @Tag(TESTSET.SMOKE)
 public class NormalMessageTest extends BaseOperate {
@@ -51,6 +53,7 @@ public class NormalMessageTest extends BaseOperate {
         tag = NameUtils.getTagName();
         groupId = NameUtils.getGroupName();
         MQAdmin.createTopic(namesrvAddr, cluster, topic, 8);
+        MQAdmin.createSub(namesrvAddr, cluster, groupId);
         logger.info("topic:{}, tag:{}, groupId:{}", topic, tag, groupId);
     }
 

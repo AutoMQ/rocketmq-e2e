@@ -696,6 +696,9 @@ public class VerifyUtils {
                 MessageExt messageExt = iter.next();
                 String messageId = messageExt.getMsgId();
                 long msgCount = receivedMessagesCopy.stream().filter(msg -> msg.getMsgId().equals(messageId)).count();
+                if (messageExt.getReconsumeTimes() > 0) {
+                    logger.info("messageId: {}, reconsumeTimes: {}", messageId, messageExt.getReconsumeTimes());
+                }
                 if (msgCount > 0 && getRepeatedTimes(receivedMessagesCopy, messageId) == 1) {
                     iter.remove();
                 }

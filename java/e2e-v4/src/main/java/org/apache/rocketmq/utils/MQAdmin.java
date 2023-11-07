@@ -18,12 +18,14 @@
 package org.apache.rocketmq.utils;
 
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.common.admin.ConsumeStats;
 import org.apache.rocketmq.common.admin.TopicStatsTable;
 import org.apache.rocketmq.common.protocol.body.ClusterInfo;
 import org.apache.rocketmq.common.protocol.route.BrokerData;
 import org.apache.rocketmq.common.subscription.SubscriptionGroupConfig;
 import org.apache.rocketmq.tools.admin.DefaultMQAdminExt;
 import org.apache.rocketmq.tools.command.CommandUtil;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,10 +57,16 @@ public class MQAdmin {
         return createTopic(nameSrvAddr, clusterName, topic, queueNum, defaultWaitTime);
     }
 
+    public static boolean createConsumerGroup(String clusterName, String groupId) {
+        int defaultWaitTime = 5;
+        return createConsumerGroup(clusterName, groupId, defaultWaitTime);
+    }
+
     public static boolean createTopic(String nameSrvAddr, String clusterName, String topic, int queueNum, int waitTimeSec) {
         boolean createResult = false;
         try {
             mqAdminExt.createTopic(clusterName, topic, queueNum);
+            log.info(String.format("create topic %s success.\n", topic));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -176,6 +184,52 @@ public class MQAdmin {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    public static boolean createConsumerGroup(String clusterName, String groupId, int waitTimeSec) {
+        boolean createResult = false;
+        try {
+            SubscriptionGroupConfig subscriptionGroupConfig = new SubscriptionGroupConfig();
+            subscriptionGroupConfig.setConsumeBroadcastEnable(false);
+            subscriptionGroupConfig.setConsumeFromMinEnable(false);
+            subscriptionGroupConfig.setGroupName(groupId);
+
+            Set<String> masterSet = CommandUtil.fetchMasterAddrByClusterName(mqAdminExt, clusterName);
+            for (String addr : masterSet) {
+                mqAdminExt.createAndUpdateSubscriptionGroupConfig(addr, subscriptionGroupConfig);
+                log.info(String.format("create subscription group %s to %s success.\n", groupId, addr));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(String.format("create groupId:%s failed", groupId));
+        }
+
+        long startTime = System.currentTimeMillis();
+        while (!createResult) {
+            createResult = checkConsumerGroupExist(mqAdminExt, groupId);
+            if (System.currentTimeMillis() - startTime < waitTimeSec * 1000) {
+                TestUtils.waitForMoment(100);
+            } else {
+                log.error(String.format("timeout,but create consumeGroup[%s] failed!", groupId));
+                break;
+            }
+        }
+        if (createResult) {
+            log.info("create consumeGroup:{} success", groupId);
+        }
+
+        return createResult;
+    }
+
+    private static boolean checkConsumerGroupExist(DefaultMQAdminExt mqAdminExt, String consumerGroup) {
+        boolean createResult = false;
+        try {
+            ConsumeStats consumeStats = mqAdminExt.examineConsumeStats(consumerGroup);
+            createResult = !consumeStats.getOffsetTable().isEmpty();
+        } catch (Exception e) {
+        }
+        return createResult;
     }
 
 }

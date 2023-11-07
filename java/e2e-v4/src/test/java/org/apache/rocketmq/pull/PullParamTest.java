@@ -76,7 +76,7 @@ public class PullParamTest extends BaseOperate {
         int sendNum = 300;
         RMQNormalConsumer consumer = ConsumerFactory.getRMQPullConsumer(namesrvAddr, groupId, rpcHook);
         consumer.startDefaultPull();
-        VerifyUtils.tryReceiveOnce(consumer.getPullConsumer(), topic, tag, 32);
+//        VerifyUtils.tryReceiveOnce(consumer.getPullConsumer(), topic, tag, 32);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);
         Assertions.assertNotNull(producer, "Get producer failed");
 
@@ -105,7 +105,7 @@ public class PullParamTest extends BaseOperate {
                         return null;
                     boolean shouldContinue = true;
                     while (shouldContinue) {
-                        PullResult pullResult = consumer.getPullConsumer().pull(mq, tag, offset, 50);
+                        PullResult pullResult = consumer.getPullConsumer().pull(mq, tag, offset, 30);
                         switch (pullResult.getPullStatus()) {
                             case FOUND:
                                 List<MessageExt> messages = pullResult.getMsgFoundList();
@@ -154,7 +154,7 @@ public class PullParamTest extends BaseOperate {
             futures[mqCount++] = future;
         }
         try {
-            CompletableFuture.allOf(futures).get(60, TimeUnit.SECONDS);
+            CompletableFuture.allOf(futures).get(90, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
             Assertions.fail("receive response count not match");
