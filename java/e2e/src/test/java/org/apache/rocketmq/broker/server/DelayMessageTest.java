@@ -37,8 +37,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag(TESTSET.DELAY)
 @Tag(TESTSET.SMOKE)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DelayMessageTest extends BaseOperate {
     private final Logger log = LoggerFactory.getLogger(DelayMessageTest.class);
     private String tag;
@@ -78,15 +82,17 @@ public class DelayMessageTest extends BaseOperate {
     }
 
     @Test
+    @Order(2)
     @DisplayName("Send 10 messages timed 10 seconds later synchronously, and expect these 10 messages to be consumed by PushConsumer 10 seconds later")
     public void testDelay_Send_PushConsume() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         String topic = getTopic(TopicMessageType.DELAY.getValue(), methodName);
-        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
+        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
+//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
+//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
+
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
@@ -99,19 +105,21 @@ public class DelayMessageTest extends BaseOperate {
     }
 
     @Test
+    @Order(4)
     @DisplayName("10 messages are sent asynchronously and are expected to be consumed by PushConsumer 10 seconds later")
     public void testDelay_SendAsync_PushConsume() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         String topic = getTopic(TopicMessageType.DELAY.getValue(), methodName);
-        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
+        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
+
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(2));
-        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
+//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(2));
+//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
         for (int i = 0; i < SEND_NUM; i++) {
-            Message message = MessageFactory.buildDelayMessage(topic, tag, RandomUtils.getStringByUUID(), System.currentTimeMillis() + 10 * 1000);
+            Message message = MessageFactory.buildDelayMessage(topic, tag, RandomUtils.getStringByUUID(), System.currentTimeMillis() + 10 * 1000L);
             producer.sendAsync(message);
         }
         await().atMost(10, SECONDS).until(new Callable<Boolean>() {
@@ -125,15 +133,16 @@ public class DelayMessageTest extends BaseOperate {
     }
 
     @Test
+    @Order(1)
     @DisplayName("Sends 10 timed messages (-20s) expecting to be delivered and consumed immediately")
     public void testDelayTime15SecondsAgo() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         String topic = getTopic(TopicMessageType.DELAY.getValue(), methodName);
-        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
+        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
-        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
+//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
+//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
@@ -146,6 +155,7 @@ public class DelayMessageTest extends BaseOperate {
     }
 
     @Test
+    @Order(3)
     @DisplayName("Send 10 timed messages (after 24 hours) , expected message fails to be sent")
     public void testDelayTime24hAfter() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
