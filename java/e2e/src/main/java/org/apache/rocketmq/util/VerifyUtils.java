@@ -543,6 +543,8 @@ public class VerifyUtils {
                 CompletableFuture.allOf(cfs).get(60, TimeUnit.SECONDS);
                 log.info("receive server response, cost={}ms", System.currentTimeMillis() - start);
             } catch (Exception e) {
+                System.out.printf("receive server response timeout, cost=%sms\n", System.currentTimeMillis() - start);
+                System.out.printf("exception message: %s\n", e.getMessage());
                 throw new RuntimeException("receive response count not match");
             }
         }

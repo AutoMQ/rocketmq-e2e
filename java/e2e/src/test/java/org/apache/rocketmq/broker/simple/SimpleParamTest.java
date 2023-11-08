@@ -117,7 +117,7 @@ public class SimpleParamTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(15));
-        VerifyUtils.tryReceiveOnce(consumer);
+//        VerifyUtils.tryReceiveOnce(consumer);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
         Message message = MessageFactory.buildMessage(topic, tag, RandomUtils.getStringByUUID());

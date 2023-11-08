@@ -18,6 +18,8 @@
 package org.apache.rocketmq.broker.simple;
 
 import java.time.Duration;
+
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.apis.consumer.SimpleConsumer;
 import org.apache.rocketmq.client.apis.message.Message;
@@ -29,6 +31,7 @@ import org.apache.rocketmq.factory.MessageFactory;
 import org.apache.rocketmq.factory.ProducerFactory;
 import org.apache.rocketmq.frame.BaseOperate;
 import org.apache.rocketmq.util.NameUtils;
+import org.apache.rocketmq.util.RandomUtils;
 import org.apache.rocketmq.util.TestUtils;
 import org.apache.rocketmq.util.VerifyUtils;
 import org.junit.jupiter.api.Assertions;
@@ -59,9 +62,9 @@ public class SimpleOrderTest extends BaseOperate {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
 
         String topic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
-        String groupId = getOrderlyGroupId(methodName);
+        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
 
-        SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
+        SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
         VerifyUtils.tryReceiveOnce(consumer);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
@@ -72,7 +75,7 @@ public class SimpleOrderTest extends BaseOperate {
         }
         TestUtils.waitForSeconds(1);
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
-        VerifyUtils.waitFIFOReceiveThenAck(producer, consumer, 5, Duration.ofSeconds(30));
+        VerifyUtils.waitFIFOReceiveThenAck(producer, consumer, SEND_NUM, Duration.ofSeconds(20));
     }
 
 }
