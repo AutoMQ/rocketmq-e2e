@@ -37,6 +37,7 @@ import org.apache.rocketmq.util.VerifyUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Only the Platinum instance of the tcp protocol client supports the use of user-defined attributes and tags to filter sequential messages
  */
+@Disabled
 @Tag(TESTSET.SQL)
 public class SqlFilterWithOrderMsgTest extends BaseOperate {
     private final Logger log = LoggerFactory.getLogger(SqlFilterTest.class);

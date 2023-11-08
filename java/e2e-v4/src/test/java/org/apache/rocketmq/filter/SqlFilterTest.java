@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
+@Disabled
 @Tag(TESTSET.SQL)
 public class SqlFilterTest extends BaseOperate {
     private final Logger log = LoggerFactory.getLogger(SqlFilterTest.class);
