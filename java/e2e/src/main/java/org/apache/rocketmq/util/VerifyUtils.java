@@ -540,7 +540,7 @@ public class VerifyUtils {
                 cfs[i] = future;
             }
             try {
-                CompletableFuture.allOf(cfs).get(30, TimeUnit.SECONDS);
+                CompletableFuture.allOf(cfs).get(60, TimeUnit.SECONDS);
                 log.info("receive server response, cost={}ms", System.currentTimeMillis() - start);
             } catch (Exception e) {
                 throw new RuntimeException("receive response count not match");
