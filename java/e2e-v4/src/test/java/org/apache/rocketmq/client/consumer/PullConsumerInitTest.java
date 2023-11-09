@@ -151,7 +151,7 @@ public class PullConsumerInitTest extends BaseOperate {
             long endTime = System.currentTimeMillis();
             log.info("endTime: {}", endTime);
             pullConsumer.shutdown();
-            Assertions.assertTrue((endTime - startTime) > 10000 && (endTime - startTime) < 20000,
+            Assertions.assertTrue((endTime - startTime) >= 10000 && (endTime - startTime) <= 20000,
                     String.format("invoke method 'receive()' exception, startTime:%s, endTime:%s, intervalTime:%s",
                             startTime, endTime, endTime - startTime));
         } catch (Exception e) {

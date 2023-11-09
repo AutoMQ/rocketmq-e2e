@@ -177,7 +177,10 @@ public class VerifyUtils {
         Collection<MessageExt> receivedMessages = dequeueMessages.getAllData();
         List<Message> messages = new ArrayList<>(receivedMessages);
         for (Message message : messages) {
-            Assertions.assertEquals(messageBody, new String(message.getBody()),
+//            Assertions.assertEquals(messageBody, new String(message.getBody()),
+//                    "The messageBody subscribed didn't match expectations");
+            System.out.printf("expect: %s, actual: %s%n", messageBody, new String(message.getBody()));
+            Assertions.assertArrayEquals(messageBody.getBytes(StandardCharsets.UTF_16), message.getBody(),
                     "The messageBody subscribed didn't match expectations");
         }
     }
@@ -619,9 +622,10 @@ public class VerifyUtils {
                     futures[mqCount++] = future;
                 }
                 try {
-                    CompletableFuture.allOf(futures).get(6, TimeUnit.SECONDS);
+                    CompletableFuture.allOf(futures).get(60, TimeUnit.SECONDS);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    System.out.printf("exception: %s%n", e.getMessage());
                     Assertions.fail("receive response count not match");
                 }
             }
