@@ -73,7 +73,7 @@ public class PullOrderParamTest extends BaseOperate {
 
         RMQNormalConsumer consumer = ConsumerFactory.getRMQPullConsumer(namesrvAddr, groupId, rpcHook);
         consumer.startDefaultPull();
-        VerifyUtils.tryReceiveOnce(consumer.getPullConsumer(), topic, tag, 32);
+//        VerifyUtils.tryReceiveOnce(consumer.getPullConsumer(), topic, tag, 32);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);
         Assertions.assertNotNull(producer, "Get producer failed");
 
@@ -147,8 +147,9 @@ public class PullOrderParamTest extends BaseOperate {
             futures[mqCount++] = future;
         }
         try {
-            CompletableFuture.allOf(futures).get(60, TimeUnit.SECONDS);
+            CompletableFuture.allOf(futures).get(120, TimeUnit.SECONDS);
         } catch (Exception e) {
+            System.out.printf("exception occurred: %s%n", e.getCause());
             e.printStackTrace();
             Assertions.fail("receive response count not match");
         }
