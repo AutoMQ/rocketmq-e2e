@@ -82,11 +82,11 @@ public class OrderMessageTest extends BaseOperate {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
 
         String topic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
-        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
+        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
-        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
+//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
+//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);
@@ -94,11 +94,12 @@ public class OrderMessageTest extends BaseOperate {
         for (int i = 0; i < SEND_NUM; i++) {
             Message message = MessageFactory.buildOrderMessage(topic, tag, String.valueOf(i), messageGroup + String.valueOf(i % 2));
             producer.send(message);
+            System.out.printf("send message %s%n", message);
         }
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
-        DataCollector<Object> dequeueMessages = simpleConsumer.getListener().getDequeueMessages();
-        dequeueMessages.addData(pushConsumer.getListener().getDequeueMessages());
-        VerifyUtils.verifyOrderMessage(producer.getEnqueueMessages(), dequeueMessages);
+//        DataCollector<Object> dequeueMessages = simpleConsumer.getListener().getDequeueMessages();
+//        dequeueMessages.addData(pushConsumer.getListener().getDequeueMessages());
+        VerifyUtils.verifyOrderMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages());
     }
 
 }

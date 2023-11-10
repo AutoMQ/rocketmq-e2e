@@ -51,7 +51,9 @@ public class RMQNormalListener extends AbstractListener implements MessageListen
         logger.info("Start listening:{}", listenerName);
     }
 
+    @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
+        System.out.printf("%s Receive New Messages: %s %n", Thread.currentThread().getName(), msgs);
         for (MessageExt message : msgs) {
             msgIndex.getAndIncrement();
             message.putUserProperty("startDeliverTime", String.valueOf(System.currentTimeMillis()));

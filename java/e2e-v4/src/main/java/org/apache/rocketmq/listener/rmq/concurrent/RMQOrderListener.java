@@ -48,6 +48,7 @@ public class RMQOrderListener extends AbstractListener implements MessageListene
 
     @Override
     public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
+        System.out.printf("%s Receive New Messages: %s %n", Thread.currentThread().getName(), msgs);
         for (MessageExt message : msgs) {
             msgIndex.getAndIncrement();
             this.dequeueAllMessages.addData(message);

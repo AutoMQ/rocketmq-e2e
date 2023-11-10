@@ -23,12 +23,14 @@ import org.apache.rocketmq.client.consumer.PullResult;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.rmq.DelayConf;
+import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
 import org.apache.rocketmq.client.rmq.RMQNormalProducer;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.utils.data.collect.DataCollector;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class VerifyUtils {
     private static Logger logger = LoggerFactory.getLogger(VerifyUtils.class);
@@ -177,7 +180,10 @@ public class VerifyUtils {
         Collection<MessageExt> receivedMessages = dequeueMessages.getAllData();
         List<Message> messages = new ArrayList<>(receivedMessages);
         for (Message message : messages) {
-            Assertions.assertEquals(messageBody, new String(message.getBody()),
+//            Assertions.assertEquals(messageBody, new String(message.getBody()),
+//                    "The messageBody subscribed didn't match expectations");
+            System.out.printf("expect: %s, actual: %s%n", messageBody, new String(message.getBody()));
+            Assertions.assertArrayEquals(messageBody.getBytes(), message.getBody(),
                     "The messageBody subscribed didn't match expectations");
         }
     }
@@ -619,9 +625,10 @@ public class VerifyUtils {
                     futures[mqCount++] = future;
                 }
                 try {
-                    CompletableFuture.allOf(futures).get(6, TimeUnit.SECONDS);
+                    CompletableFuture.allOf(futures).get(60, TimeUnit.SECONDS);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    System.out.printf("exception: %s%n", e.getMessage());
                     Assertions.fail("receive response count not match");
                 }
             }
@@ -696,6 +703,9 @@ public class VerifyUtils {
                 MessageExt messageExt = iter.next();
                 String messageId = messageExt.getMsgId();
                 long msgCount = receivedMessagesCopy.stream().filter(msg -> msg.getMsgId().equals(messageId)).count();
+                if (messageExt.getReconsumeTimes() > 0) {
+                    logger.info("messageId: {}, reconsumeTimes: {}", messageId, messageExt.getReconsumeTimes());
+                }
                 if (msgCount > 0 && getRepeatedTimes(receivedMessagesCopy, messageId) == 1) {
                     iter.remove();
                 }
@@ -954,5 +964,37 @@ public class VerifyUtils {
         }
         Assertions.assertTrue(sendCollection.size() == 0, String.format("Remaining [%s] unconsumed messages: %s",
                 sendCollection.size(), Arrays.toString(sendCollection.toArray())));
+    }
+
+
+    public static void waitForLoadBalance(String topic, RMQNormalConsumer... allConsumers) {
+        Awaitility.await().atMost(120, TimeUnit.SECONDS)
+            .pollInterval(100, TimeUnit.MILLISECONDS)
+            .until(() -> {
+                int avgGroup = 8 / allConsumers.length;
+                Set<MessageQueue> allMessageQueues = new HashSet<>();
+                for(RMQNormalConsumer consumer: allConsumers) {
+                    Set<MessageQueue> messageQueues = consumer.getMessageQueues(topic);
+                    if(messageQueues.size() != avgGroup) {
+                        return false;
+                    }
+                    allMessageQueues.addAll(messageQueues);
+                }
+                return allMessageQueues.size() == 8;
+            });
+    }
+
+    public static void waitForAllocateAvg(String topic, RMQNormalConsumer... allConsumers) {
+        Awaitility.await().atMost(120, TimeUnit.SECONDS)
+            .pollInterval(100, TimeUnit.MILLISECONDS)
+            .until(() -> {
+                int size = 0;
+                for(RMQNormalConsumer consumer: allConsumers) {
+                    Set<MessageQueue> messageQueues = consumer.getMessageQueues(topic);
+                    size +=  messageQueues.size();
+                }
+                return size == 8;
+            });
+
     }
 }

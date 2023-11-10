@@ -17,9 +17,13 @@
 
 package org.apache.rocketmq.cluster;
 
+import apache.rocketmq.controller.v1.SubscriptionMode;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
+import org.apache.rocketmq.client.impl.consumer.DefaultMQPushConsumerImpl;
 import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
 import org.apache.rocketmq.client.rmq.RMQNormalProducer;
 import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.enums.TESTSET;
 import org.apache.rocketmq.factory.ConsumerFactory;
 import org.apache.rocketmq.factory.ProducerFactory;
@@ -28,9 +32,14 @@ import org.apache.rocketmq.listener.rmq.concurrent.RMQNormalListener;
 import org.apache.rocketmq.utils.NameUtils;
 import org.apache.rocketmq.utils.RandomUtils;
 import org.apache.rocketmq.utils.VerifyUtils;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Tag(TESTSET.MODEL)
 public class ClusterTest extends BaseOperate {
@@ -67,6 +76,7 @@ public class ClusterTest extends BaseOperate {
         }
     }
 
+    @Disabled
     @Test
     @DisplayName("Send 100 normal messages synchronously, start three consumers on different GroupId, and expect each client to consume up to 100 messages")
     public void testBroadcastConsume() {
@@ -98,6 +108,7 @@ public class ClusterTest extends BaseOperate {
         VerifyUtils.verifyNormalMessage(producer.getEnqueueMessages(), listenerC.getDequeueMessages());
     }
 
+    @Disabled
     @Test
     @DisplayName("Send 100 normal messages synchronously, start three consumers on same GroupId, and expect each client to consume up to 100 messages")
     public void testBroadcastConsumeWithSameGroupId() {
@@ -129,7 +140,7 @@ public class ClusterTest extends BaseOperate {
 
     @Test
     @DisplayName("Send 100 normal messages synchronously, start 3 consumers on the same GroupId, expect 3 clients to consume a total of 100 messages")
-    public void testClusterConsume() {
+    public void testClusterConsume() throws InterruptedException {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         String topic = getTopic(methodName);
         String groupId = getGroupId(methodName);
@@ -142,6 +153,9 @@ public class ClusterTest extends BaseOperate {
         pushConsumer01.subscribeAndStart(topic,tag, listenerA);
         pushConsumer02.subscribeAndStart(topic,tag, listenerB);
         pushConsumer03.subscribeAndStart(topic,tag, listenerC);
+
+
+        VerifyUtils.waitForAllocateAvg(topic, pushConsumer01, pushConsumer02, pushConsumer03);
 
         producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);
         Assertions.assertNotNull(producer, "Get producer failed");

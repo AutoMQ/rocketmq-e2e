@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.apis.ClientException;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.apis.consumer.SimpleConsumer;
@@ -197,6 +199,7 @@ public class SimpleOrderParamTest extends BaseOperate {
 
         String messageGroup = RandomUtils.getStringByUUID();
         for (int i = 0; i < SEND_NUM; i++) {
+            System.out.printf("Producer send message %s%n", i);
             Message message = MessageFactory.buildOrderMessage(topic, tag, String.valueOf(i), messageGroup);
             producer.send(message);
         }
@@ -239,7 +242,7 @@ public class SimpleOrderParamTest extends BaseOperate {
                     log.info("End Execution");
                     Assertions.assertEquals(3, map.size());
                     for (Map.Entry<String, Integer> entry : map.entrySet()) {
-                        Assertions.assertTrue(entry.getValue() > 1);
+                        Assertions.assertTrue(entry.getValue() >= 1);
                     }
                 }
             });

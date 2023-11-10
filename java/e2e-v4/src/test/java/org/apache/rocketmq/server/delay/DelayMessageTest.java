@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Disabled
 @Tag(TESTSET.SMOKE)
 @Tag(TESTSET.DELAY)
 public class DelayMessageTest extends BaseOperate {

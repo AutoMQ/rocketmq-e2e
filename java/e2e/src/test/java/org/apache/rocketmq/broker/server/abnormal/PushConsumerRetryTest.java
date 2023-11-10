@@ -77,8 +77,8 @@ public class PushConsumerRetryTest extends BaseOperate {
         Map<String, MessageView> noRetryMsgs = new ConcurrentHashMap<>();
         Map<String, MessageView> retryMsgs = new ConcurrentHashMap<>();
 
-        SimpleConsumer simpleConsumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(simpleConsumer);
+//        SimpleConsumer simpleConsumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
+//        VerifyUtils.tryReceiveOnce(simpleConsumer);
 
         try {
             provider.newPushConsumerBuilder().setClientConfiguration(ClientConfigurationFactory.build(account)).setConsumerGroup(groupId).setSubscriptionExpressions(Collections.singletonMap(topic, new FilterExpression(tag, FilterExpressionType.TAG))).setConsumptionThreadCount(20).setMessageListener(messageView -> {
@@ -121,8 +121,8 @@ public class PushConsumerRetryTest extends BaseOperate {
         String topic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
         String groupId = getOrderlyGroupId(methodName);
 
-        SimpleConsumer simpleConsumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(simpleConsumer);
+//        SimpleConsumer simpleConsumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
+//        VerifyUtils.tryReceiveOnce(simpleConsumer);
 
         PushConsumer pushConsumer = null;
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
@@ -175,8 +175,8 @@ public class PushConsumerRetryTest extends BaseOperate {
         String topic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
         String groupId = getOrderlyGroupId(methodName);
 
-        SimpleConsumer simpleConsumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(simpleConsumer);
+//        SimpleConsumer simpleConsumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
+//        VerifyUtils.tryReceiveOnce(simpleConsumer);
 
         PushConsumer pushConsumer = null;
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);

@@ -78,7 +78,7 @@ public class SimpleAckTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(consumer);
+//        VerifyUtils.tryReceiveOnce(consumer);
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
         for (int i = 0; i < SEND_NUM; i++) {
@@ -98,7 +98,7 @@ public class SimpleAckTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(consumer);
+//        VerifyUtils.tryReceiveOnce(consumer);
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
@@ -120,7 +120,7 @@ public class SimpleAckTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(consumer);
+//        VerifyUtils.tryReceiveOnce(consumer);
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
@@ -142,7 +142,7 @@ public class SimpleAckTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(consumer);
+//        VerifyUtils.tryReceiveOnce(consumer);
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");

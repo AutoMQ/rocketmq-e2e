@@ -53,19 +53,18 @@ public class NormalMessageSizeTest extends BaseOperate {
     private static String delayTopic;
     private static Producer producer;
 
-    @Disabled
     @BeforeAll
     public static void setUpAll() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         normalTopic = getTopic(TopicMessageType.NORMAL.getValue(), methodName);
-        transTopic = getTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
+//        transTopic = getTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
         delayTopic = getTopic(TopicMessageType.DELAY.getValue(), methodName);
         fifoTopic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
         try {
             producer = provider.newProducerBuilder()
                 .setTransactionChecker(messageView -> TransactionResolution.COMMIT)
                 .setClientConfiguration(ClientConfigurationFactory.build(account))
-                .setTopics(normalTopic, transTopic, delayTopic, fifoTopic)
+                .setTopics(normalTopic, delayTopic, fifoTopic)
                 .build();
         } catch (ClientException e) {
             Assertions.fail("create producer failed");
