@@ -56,12 +56,6 @@ public class RMQOrderListener extends AbstractListener implements MessageListene
             logger.info("{} - MessageId:{}, ReconsumeTimes:{}, Body:{}, tag:{}, recvIndex:{}, action:{}", listenerName, message.getMsgId(),
                     message.getReconsumeTimes(), new String(message.getBody()), message.getTags(), msgIndex.getAndIncrement() + 1, consumeStatus);
         }
-        // time sleep
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return consumeStatus;
     }
 }

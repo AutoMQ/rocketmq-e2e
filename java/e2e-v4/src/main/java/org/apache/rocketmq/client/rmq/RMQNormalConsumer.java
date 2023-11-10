@@ -22,7 +22,9 @@ import org.apache.rocketmq.client.consumer.DefaultMQPullConsumer;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.impl.consumer.DefaultMQPushConsumerImpl;
 import org.apache.rocketmq.common.AbstractMQConsumer;
+import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.listener.AbstractListener;
 import org.apache.rocketmq.listener.rmq.concurrent.RMQIdempotentListener;
 import org.apache.rocketmq.listener.rmq.concurrent.RMQNormalListener;
@@ -31,6 +33,9 @@ import org.apache.rocketmq.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.util.Set;
 
 public class RMQNormalConsumer extends AbstractMQConsumer {
     private static Logger logger = LoggerFactory.getLogger(RMQNormalConsumer.class);
@@ -158,6 +163,22 @@ public class RMQNormalConsumer extends AbstractMQConsumer {
         if (litePullConsumer != null) {
             litePullConsumer.shutdown();
             logger.info("DefaultLitePullConsumer shutdown !!!");
+        }
+    }
+
+    public Set<MessageQueue> getMessageQueues(String topic) {
+        Assertions.assertNotNull(pushConsumer);
+        Field field = null;
+        try {
+            field = DefaultMQPushConsumer.class.getDeclaredField("defaultMQPushConsumerImpl");
+            field.setAccessible(true);
+            DefaultMQPushConsumerImpl defaultMQPushConsumer = (DefaultMQPushConsumerImpl) field.get(pushConsumer);
+            return defaultMQPushConsumer.getRebalanceImpl().getProcessQueueTable().keySet().stream().filter(
+                    messageQueue -> messageQueue.getTopic().equals(topic)).collect(java.util.stream.Collectors.toSet());
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 
