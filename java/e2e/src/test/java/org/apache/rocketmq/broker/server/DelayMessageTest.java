@@ -146,7 +146,7 @@ public class DelayMessageTest extends BaseOperate {
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
         for (int i = 0; i < SEND_NUM; i++) {
-            Message message = MessageFactory.buildDelayMessage(topic, tag, RandomUtils.getStringByUUID(), System.currentTimeMillis() - 10 * 1000);
+            Message message = MessageFactory.buildDelayMessage(topic, tag, RandomUtils.getStringByUUID(), System.currentTimeMillis() - 5 * 1000);
             producer.send(message);
         }
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
