@@ -59,6 +59,7 @@ public class SimpleOrderParamTest extends BaseOperate {
     private String tag;
     private String groupId;
     private final static int SEND_NUM = 20;
+    static final String PROPERTY_SHARDING_KEY = "__SHARDINGKEY";
 
     @BeforeEach
     public void setUp() {
@@ -82,10 +83,11 @@ public class SimpleOrderParamTest extends BaseOperate {
         VerifyUtils.tryReceiveOnce(consumer);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
-
+        String orderId = RandomUtils.getStringByUUID();
         String messageGroup = RandomUtils.getStringByUUID();
         for (int i = 0; i < SEND_NUM; i++) {
             Message message = MessageFactory.buildOrderMessage(topic, tag, String.valueOf(i), messageGroup);
+            message.getProperties().put(PROPERTY_SHARDING_KEY, orderId);
             producer.send(message);
         }
         TestUtils.waitForSeconds(1);
@@ -193,14 +195,15 @@ public class SimpleOrderParamTest extends BaseOperate {
         String groupId = getOrderlyGroupId(methodName);
 
         SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(consumer);
+//        VerifyUtils.tryReceiveOnce(consumer);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
-
+        String orderId = RandomUtils.getStringByUUID();
         String messageGroup = RandomUtils.getStringByUUID();
         for (int i = 0; i < SEND_NUM; i++) {
             System.out.printf("Producer send message %s%n", i);
             Message message = MessageFactory.buildOrderMessage(topic, tag, String.valueOf(i), messageGroup);
+            message.getProperties().put(PROPERTY_SHARDING_KEY, orderId);
             producer.send(message);
         }
         TestUtils.waitForSeconds(1);
