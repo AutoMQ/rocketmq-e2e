@@ -17,6 +17,8 @@
 
 package org.apache.rocketmq.cluster;
 
+import apache.rocketmq.controller.v1.MessageType;
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.frame.BaseOperate;
 import org.apache.rocketmq.listener.rmq.concurrent.RMQIdempotentListener;
 import org.apache.rocketmq.listener.rmq.concurrent.RMQNormalListener;
@@ -63,6 +65,8 @@ public class LoadBalancingTest extends BaseOperate {
     private final Logger log = LoggerFactory.getLogger(LoadBalancingTest.class);
     private String tag;
     private final static int SEND_NUM = 10;
+
+    static final String PROPERTY_SHARDING_KEY = "__SHARDINGKEY";
 
     @BeforeEach
     public void setUp() {
@@ -164,8 +168,8 @@ public class LoadBalancingTest extends BaseOperate {
     public void testLoadBalancing_global_sequential_message(){
         int messageSize = 30;
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        String topic = getTopic(methodName);
-        String groupId = getGroupId(methodName);
+        String topic = getTopic(MessageType.FIFO, methodName);
+        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);
 
 //        RMQNormalConsumer pullConsumer = ConsumerFactory.getRMQLitePullConsumer(namesrvAddr, groupId, rpcHook,1);
@@ -177,6 +181,8 @@ public class LoadBalancingTest extends BaseOperate {
         RMQNormalConsumer consumer2 = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook,new AllocateMessageQueueAveragely());
         consumer1.subscribeAndStart(topic, tag, new RMQOrderListener());
         consumer2.subscribeAndStart(topic, tag, new RMQOrderListener());
+
+        VerifyUtils.waitForLoadBalance(topic, consumer1, consumer2);
 
         Assertions.assertNotNull(producer);
         List<MessageQueue> msgQueues = producer.fetchPublishMessageQueues(topic);
@@ -196,6 +202,8 @@ public class LoadBalancingTest extends BaseOperate {
         consumer1.shutdown();
 
         consumer2.getListener().clearMsg();
+
+        VerifyUtils.waitForLoadBalance(topic, consumer2);
 
         producer.sendWithQueue(msgQueue,tag,messageSize);
 
@@ -217,8 +225,8 @@ public class LoadBalancingTest extends BaseOperate {
     public void testLoadBalancing_partition_sequential_message(){
         int messageSize = 240;
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        String topic = getTopic(methodName);
-        String groupId = getGroupId(methodName);
+        String topic = getTopic(MessageType.FIFO, methodName);
+        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);
 
 //        RMQNormalConsumer pullConsumer = ConsumerFactory.getRMQLitePullConsumer(namesrvAddr, groupId, rpcHook,1);
@@ -235,10 +243,11 @@ public class LoadBalancingTest extends BaseOperate {
         consumer3.subscribeAndStart(topic, tag, new RMQOrderListener());
         consumer4.subscribeAndStart(topic, tag, new RMQOrderListener());
         VerifyUtils.waitForLoadBalance(topic, consumer1, consumer2, consumer3, consumer4);
-
+        String orderId = "biz_" + 0;
         Assertions.assertNotNull(producer);
         for (int i = 0; i < messageSize; i++) {
             Message message = MessageFactory.buildOneMessageWithTagAndBody(topic, tag, String.valueOf(i));
+            message.putUserProperty(PROPERTY_SHARDING_KEY, orderId);
             try {
                 SendResult sendResult = producer.getProducer().send(message, new MessageQueueSelector(){
 
@@ -251,6 +260,7 @@ public class LoadBalancingTest extends BaseOperate {
                 },i);
                 log.info("{}, index: {}, tag: {}", sendResult, i, tag);
             } catch (Exception e) {
+                log.info(String.format("DefaultMQProducer send message failed, index: %d, tag: %s exception: %s", i, tag, e.getMessage()));
                 Assertions.fail("DefaultMQProducer send message failed");
             }
         }
@@ -283,6 +293,7 @@ public class LoadBalancingTest extends BaseOperate {
 
         for (int i = 0; i < messageSize; i++) {
             Message message = MessageFactory.buildOneMessageWithTagAndBody(topic, tag, String.valueOf(i));
+            message.putUserProperty(PROPERTY_SHARDING_KEY, orderId);
             try {
                 SendResult sendResult = producer.getProducer().send(message, new MessageQueueSelector(){
 
