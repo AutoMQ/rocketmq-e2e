@@ -185,8 +185,15 @@ public class VerifyUtils {
     public static void verifyDelayMessage(DataCollector<Object> enqueueMessages,
         DataCollector<Object> dequeueMessages, int delayTime) {
         //Check whether the consumption is complete
-        Collection<Object> unConsumedMessages = waitForMessageConsume(enqueueMessages, dequeueMessages,
-            (TIMEOUT + delayTime) * 1000L, 1);
+        Collection<Object> unConsumedMessages = null;
+        if (delayTime == 0) {
+            unConsumedMessages = waitForMessageConsume(enqueueMessages, dequeueMessages,
+                (TIMEOUT / 2 + delayTime) * 1000L, 1);
+        } else {
+            unConsumedMessages = waitForMessageConsume(enqueueMessages, dequeueMessages,
+                (TIMEOUT + delayTime) * 1000L, 1);
+        }
+
         if (unConsumedMessages.size() > 0) {
             Assertions.fail(String.format("The following %s messages are not consumed: %s", unConsumedMessages.size(), unConsumedMessages));
         }

@@ -131,7 +131,7 @@ public class SimpleParamTest extends BaseOperate {
                 if (messageViews.size() > 0) {
                     for (MessageView messageView : messageViews) {
                         log.info("MessageId:{}, Body:{}, tag:{}, property:{}", messageView.getMessageId(), StandardCharsets.UTF_8.decode(messageView.getBody()).toString(), messageView.getTag().get(), messageView.getProperties());
-                        TestUtils.waitForSeconds(11);
+                        TestUtils.waitForSeconds(15);
                         consumer.ack(messageView);
                         Assertions.fail("Calling changeInvisibleDuration after ack fails with an INVALID_RECEIPT_HANDLE error");
                     }
