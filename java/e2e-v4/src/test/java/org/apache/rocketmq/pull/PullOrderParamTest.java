@@ -17,6 +17,8 @@
 
 package org.apache.rocketmq.pull;
 
+import apache.rocketmq.controller.v1.MessageType;
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.consumer.PullResult;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -68,8 +70,8 @@ public class PullOrderParamTest extends BaseOperate {
     @DisplayName("When sending 20 sequential messages synchronously using the same MessageQueue, PullConsumer normally receives messages, but does not ack messages, and keeps the sequence; the messages are stuck at the first")
     public void testFIFO_pull_receive_nack() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        String topic = getTopic(methodName);
-        String groupId = getGroupId(methodName);
+        String topic = getTopic(MessageType.FIFO, methodName);
+        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
 
         RMQNormalConsumer consumer = ConsumerFactory.getRMQPullConsumer(namesrvAddr, groupId, rpcHook);
         consumer.startDefaultPull();

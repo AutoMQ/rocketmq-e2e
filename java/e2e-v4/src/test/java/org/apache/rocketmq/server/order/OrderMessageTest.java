@@ -17,6 +17,8 @@
 
 package org.apache.rocketmq.server.order;
 
+import apache.rocketmq.controller.v1.MessageType;
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
 import org.apache.rocketmq.client.rmq.RMQNormalProducer;
 import org.apache.rocketmq.common.message.MessageQueue;
@@ -39,7 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-@Disabled
 @Tag(TESTSET.SMOKE)
 @Tag(TESTSET.ORDER)
 public class OrderMessageTest extends BaseOperate {
@@ -51,10 +52,10 @@ public class OrderMessageTest extends BaseOperate {
 
     @BeforeEach
     public void setUp() {
-        topic = NameUtils.getTopicName();
+//        topic = NameUtils.getTopicName();
+//        groupId = NameUtils.getGroupName();
+//        MQAdmin.createTopic(namesrvAddr, cluster, topic, 8);
         tag = NameUtils.getTagName();
-        groupId = NameUtils.getGroupName();
-        MQAdmin.createTopic(namesrvAddr, cluster, topic, 8);
         logger.info("topic:{}, tag:{}, groupId:{}", topic, tag, groupId);
     }
 
@@ -66,6 +67,11 @@ public class OrderMessageTest extends BaseOperate {
     @Test
     @DisplayName("Thirty messages are sent to each of the eight queues in a topic, with the expectation that the sequential consumption client will consume the messages in each queue in order")
     public void testConsumePartitionOrderMessage() {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+
+        String topic = getTopic(MessageType.FIFO, methodName);
+        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
+
         RMQNormalConsumer consumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         consumer.subscribeAndStart(topic, "*", new RMQOrderListener());
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);
@@ -80,6 +86,11 @@ public class OrderMessageTest extends BaseOperate {
     @Test
     @DisplayName("100 messages are sent to a queue for a topic, with the expectation that the sequential consuming client will consume the messages in the queue in order")
     public void testConsumeGlobalOrderMessage() {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+
+        String topic = getTopic(MessageType.FIFO, methodName);
+        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
+
         RMQNormalConsumer consumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         consumer.subscribeAndStart(topic, "*", new RMQOrderListener());
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);

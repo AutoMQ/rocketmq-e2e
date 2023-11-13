@@ -17,6 +17,8 @@
 
 package org.apache.rocketmq.pull;
 
+import apache.rocketmq.controller.v1.MessageType;
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
 import org.apache.rocketmq.client.rmq.RMQNormalProducer;
 import org.apache.rocketmq.common.message.MessageQueue;
@@ -54,9 +56,8 @@ public class PullOrderTest extends BaseOperate {
     @DisplayName("Send 20 sequential messages synchronously, and expect PullConsumer to receive and ack messages properly and maintain the sequence")
     public void testFIFO_simple_receive_ack() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-
-        String topic = getTopic(methodName);
-        String groupId = getGroupId(methodName);
+        String topic = getTopic(MessageType.FIFO, methodName);
+        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
 
         RMQNormalConsumer consumer = ConsumerFactory.getRMQPullConsumer(namesrvAddr, groupId, rpcHook);
         consumer.startDefaultPull();

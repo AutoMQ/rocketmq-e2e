@@ -80,6 +80,7 @@ public class BatchProducerTest extends BaseOperate {
         try {
             producer.getProducer().send(messages);
         } catch (Exception e) {
+            System.out.printf("send message error: %s", e.getMessage());
             Assertions.fail(e.getMessage());
         }
 
@@ -114,6 +115,7 @@ public class BatchProducerTest extends BaseOperate {
         try {
             producer.getProducer().send(messages, msgQueues.get(0));
         } catch (Exception e) {
+            System.out.printf("send message error: %s", e.getMessage());
             Assertions.fail(e.getMessage());
         }
 

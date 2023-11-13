@@ -49,6 +49,7 @@ public class RMQSendCallBack implements SendCallback {
     public void onException(Throwable e) {
         //logger.warn("{} callback message failed: {}  exception: {}", context.getTopic(), context.getMessageId(), context.getException());
         bFailResponse = true;
+        logger.warn("callback message failed: {}", e);
     }
 
     public void waitResponse() {
