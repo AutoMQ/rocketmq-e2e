@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,6 +45,7 @@ import org.apache.rocketmq.factory.ProducerFactory;
 import org.apache.rocketmq.frame.BaseOperate;
 import org.apache.rocketmq.util.NameUtils;
 import org.apache.rocketmq.util.RandomUtils;
+import org.apache.rocketmq.util.TestUtils;
 import org.apache.rocketmq.util.VerifyUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -157,12 +159,14 @@ public class PushConsumerRetryTest extends BaseOperate {
         }
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
         //All messages are consumed.
+        TestUtils.waitForSeconds(1);
         await().atMost(120, SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 return recvMessages.size() == SEND_NUM;
             }
         });
+
         for (int i = 0; i < SEND_NUM; i++) {
             Assertions.assertEquals(i, Integer.parseInt(StandardCharsets.UTF_8.decode(recvMessages.get(i).getBody()).toString()), "recv message failed");
         }

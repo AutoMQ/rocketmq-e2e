@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@Disabled
 @Tag(TESTSET.SMOKE)
 @Tag(TESTSET.DELAY)
 public class DelayMessageTest extends BaseOperate {
@@ -61,7 +60,9 @@ public class DelayMessageTest extends BaseOperate {
         topic = NameUtils.getTopicName();
         tag = NameUtils.getTagName();
         groupId = NameUtils.getGroupName();
-        MQAdmin.createTopic(namesrvAddr, cluster, topic, 8);
+//        MQAdmin.createTopic(namesrvAddr, cluster, topic, 8);
+        getTopic(topic);
+        getGroupId(groupId);
         logger.info("topic:{}, tag:{}, groupId:{}", topic, tag, groupId);
     }
 
@@ -102,7 +103,6 @@ public class DelayMessageTest extends BaseOperate {
         consumer.shutdown();
     }
 
-    @Disabled
     @Test
     @DisplayName("Send one delay message and set the delay test negative delay level, expecting message building wrong")
     public void testNegativeDelayLevel() {
@@ -119,7 +119,6 @@ public class DelayMessageTest extends BaseOperate {
         producer.shutdown();
     }
 
-    @Disabled
     @Test
     @DisplayName("Send one delay message and set the delay test delay level=19, expecting message building wrong")
     public void testDelayLevelWith19() {

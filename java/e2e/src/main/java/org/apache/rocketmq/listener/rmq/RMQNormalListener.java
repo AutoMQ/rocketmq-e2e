@@ -82,7 +82,7 @@ public class RMQNormalListener extends MQCollector implements MessageListener {
             TestUtils.waitForSeconds(workTime);
         }
 
-        logger.info("{} - MessageId:{}, body:{}, tag:{},  key:{}, recvIndex:{}, property:{}, action:{}", listenerName, view.getMessageId(), StandardCharsets.UTF_8.decode(view.getBody()), view.getTag().isPresent() ? view.getTag().get() : "", view.getKeys(), msgIndex.getAndIncrement() + 1, view.getProperties(), consumeStatus);
+        logger.info("consume message {} - MessageId:{}, body:{}, tag:{},  key:{}, recvIndex:{}, property:{}, action:{}", listenerName, view.getMessageId(), StandardCharsets.UTF_8.decode(view.getBody()), view.getTag().isPresent() ? view.getTag().get() : "", view.getKeys(), msgIndex.getAndIncrement() + 1, view.getProperties(), consumeStatus);
         return result;
     }
 }

@@ -17,6 +17,8 @@
 
 package org.apache.rocketmq.server.normal;
 
+import apache.rocketmq.controller.v1.MessageType;
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.callback.RMQSendCallBack;
 import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
 import org.apache.rocketmq.client.rmq.RMQNormalProducer;
@@ -27,6 +29,7 @@ import org.apache.rocketmq.frame.BaseOperate;
 import org.apache.rocketmq.listener.rmq.concurrent.RMQNormalListener;
 import org.apache.rocketmq.utils.MQAdmin;
 import org.apache.rocketmq.utils.NameUtils;
+import org.apache.rocketmq.utils.TestUtils;
 import org.apache.rocketmq.utils.VerifyUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +40,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Disabled
 @Tag(TESTSET.NORMAL)
 @Tag(TESTSET.SMOKE)
 public class NormalMessageTest extends BaseOperate {
@@ -49,17 +51,22 @@ public class NormalMessageTest extends BaseOperate {
 
     @BeforeEach
     public void setUp() {
-        topic = NameUtils.getTopicName();
+//        topic = NameUtils.getTopicName();
+//        groupId = NameUtils.getGroupName();
+//        MQAdmin.createTopic(namesrvAddr, cluster, topic, 8);
+//        MQAdmin.createSub(namesrvAddr, cluster, groupId);
         tag = NameUtils.getTagName();
-        groupId = NameUtils.getGroupName();
-        MQAdmin.createTopic(namesrvAddr, cluster, topic, 8);
-        MQAdmin.createSub(namesrvAddr, cluster, groupId);
         logger.info("topic:{}, tag:{}, groupId:{}", topic, tag, groupId);
     }
 
     @Test
     @DisplayName("Send 10 normal messages synchronously, expecting all to be consumed")
     public void testConsumeNormalMessage() {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+
+        String topic = getTopic(MessageType.NORMAL, methodName);
+        String groupId = getGroupId(methodName);
+
         RMQNormalConsumer consumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         consumer.subscribeAndStart(topic, tag, new RMQNormalListener());
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr,rpcHook);
@@ -73,12 +80,17 @@ public class NormalMessageTest extends BaseOperate {
     @Test
     @DisplayName("Send 10 normal messages asynchronously, expecting all to be consumed")
     public void testConsumeNormalMessageAndSendWithAsync() {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+
+        String topic = getTopic(MessageType.NORMAL, methodName);
+        String groupId = getGroupId(methodName);
+
         RMQNormalConsumer consumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         consumer.subscribeAndStart(topic, tag, new RMQNormalListener());
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr,rpcHook);
         RMQSendCallBack callBack = new RMQSendCallBack();
         producer.sendAsync(topic, tag, callBack, SEND_NUM);
-
+        TestUtils.waitForSeconds(1);
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "消息发送失败");
         VerifyUtils.verifyNormalMessage(producer.getEnqueueMessages(), consumer.getListener().getDequeueMessages());
     }
@@ -86,6 +98,11 @@ public class NormalMessageTest extends BaseOperate {
     @Test
     @DisplayName("Send 10 normal messages in OneWay, expecting all to be consumed")
     public void testConsumeNormalMessageAndSendWithOneWay() {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+
+        String topic = getTopic(MessageType.NORMAL, methodName);
+        String groupId = getGroupId(methodName);
+
         RMQNormalConsumer consumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         consumer.subscribeAndStart(topic, tag, new RMQNormalListener());
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr,rpcHook);

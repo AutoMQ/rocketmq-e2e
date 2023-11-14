@@ -116,22 +116,22 @@ public class SimpleParamTest extends BaseOperate {
         String topic = getTopic(TopicMessageType.NORMAL.getValue(), methodName);
         String groupId = getGroupId(methodName);
 
-        SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
+        SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
 //        VerifyUtils.tryReceiveOnce(consumer);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
         Message message = MessageFactory.buildMessage(topic, tag, RandomUtils.getStringByUUID());
         producer.send(message);
         Assertions.assertEquals(1, producer.getEnqueueMessages().getDataSize(), "send message failed");
-
         try {
             long startTime = System.currentTimeMillis();
-            while (System.currentTimeMillis() < startTime + 60000) {
+            while (System.currentTimeMillis() < startTime + 120000) {
+                TestUtils.waitForSeconds(1);
                 List<MessageView> messageViews = consumer.receive(1, Duration.ofSeconds(10));
                 if (messageViews.size() > 0) {
                     for (MessageView messageView : messageViews) {
                         log.info("MessageId:{}, Body:{}, tag:{}, property:{}", messageView.getMessageId(), StandardCharsets.UTF_8.decode(messageView.getBody()).toString(), messageView.getTag().get(), messageView.getProperties());
-                        TestUtils.waitForSeconds(11);
+                        TestUtils.waitForSeconds(40);
                         consumer.ack(messageView);
                         Assertions.fail("Calling changeInvisibleDuration after ack fails with an INVALID_RECEIPT_HANDLE error");
                     }

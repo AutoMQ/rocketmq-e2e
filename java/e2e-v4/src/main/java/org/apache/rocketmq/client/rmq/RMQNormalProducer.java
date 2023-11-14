@@ -40,6 +40,7 @@ public class RMQNormalProducer extends AbstractMQProducer {
     private static Logger logger = LoggerFactory.getLogger(RMQNormalProducer.class);
     private DefaultMQProducer producer;
 
+    static final String PROPERTY_SHARDING_KEY = "__SHARDINGKEY";
     public RMQNormalProducer(DefaultMQProducer producer) {
         this.producer = producer;
     }
@@ -115,9 +116,11 @@ public class RMQNormalProducer extends AbstractMQProducer {
      */
     public void sendWithQueue(List<MessageQueue> mqs, String tag, int messageNum) {
         logger.info("Producer start to send messages");
+        String orderId = "biz_" + 0;
         for (MessageQueue mq : mqs) {
             for (int i = 0; i < messageNum; i++) {
                 Message message = MessageFactory.buildOneMessageWithTagAndBody(mq.getTopic(), tag, String.valueOf(i));
+                message.putUserProperty(PROPERTY_SHARDING_KEY, orderId);
                 try {
                     SendResult sendResult = producer.send(message, mq);
                     MessageExt messageExt = new MessageExt();
@@ -141,9 +144,11 @@ public class RMQNormalProducer extends AbstractMQProducer {
      */
     public void sendWithQueue(List<MessageQueue> mqs, int messageNum, String tag) {
         logger.info("Producer start to send messages");
+        String orderId = "biz_" + 0;
         for (MessageQueue mq : mqs) {
             for (int i = 0; i < messageNum; i++) {
                 Message message = MessageFactory.buildOneMessageWithTagAndBody(mq.getTopic(), tag, String.valueOf(i));
+                message.putUserProperty(PROPERTY_SHARDING_KEY, orderId);
                 try {
                     SendResult sendResult = producer.send(message, mq);
                     MessageExt messageExt = new MessageExt();
@@ -152,6 +157,7 @@ public class RMQNormalProducer extends AbstractMQProducer {
                     logger.info("{}, index: {}, tag: {}", sendResult, i, tag);
                     this.enqueueMessages.addData(messageExt);
                 } catch (Exception e) {
+                    System.out.printf("send message failed %s", e);
                     logger.error("DefaultMQProducer send message failed");
                 }
             }

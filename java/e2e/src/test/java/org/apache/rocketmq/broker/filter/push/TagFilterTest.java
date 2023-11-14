@@ -31,12 +31,14 @@ import org.apache.rocketmq.listener.rmq.RMQNormalListener;
 import org.apache.rocketmq.util.NameUtils;
 import org.apache.rocketmq.util.TestUtils;
 import org.apache.rocketmq.util.VerifyUtils;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,6 +104,7 @@ public class TagFilterTest extends BaseOperate {
 //        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(receiveTag), Duration.ofSeconds(10));
 //        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
         producer = ProducerFactory.getRMQProducer(account, topic);
+        TestUtils.waitForSeconds(1);
         Assertions.assertNotNull(producer);
         producer.send(topic, sendTagA, SEND_NUM);
         producer.send(topic, sendTagB, SEND_NUM);
