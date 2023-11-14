@@ -117,6 +117,8 @@ public class LoadBalancingTest extends BaseOperate {
         consumer3.shutdown();
         consumer4.shutdown();
 
+        VerifyUtils.waitForLoadBalance(topic, consumer1, consumer2);
+
         producer.send(topic, tag, messageSize);
 
         await().atMost(120, SECONDS).until(new Callable<Boolean>() {
