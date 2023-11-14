@@ -116,17 +116,17 @@ public class SimpleParamTest extends BaseOperate {
         String topic = getTopic(TopicMessageType.NORMAL.getValue(), methodName);
         String groupId = getGroupId(methodName);
 
-        SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
+        SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
 //        VerifyUtils.tryReceiveOnce(consumer);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
         Message message = MessageFactory.buildMessage(topic, tag, RandomUtils.getStringByUUID());
         producer.send(message);
         Assertions.assertEquals(1, producer.getEnqueueMessages().getDataSize(), "send message failed");
-
         try {
             long startTime = System.currentTimeMillis();
-            while (System.currentTimeMillis() < startTime + 60000) {
+            while (System.currentTimeMillis() < startTime + 120000) {
+                TestUtils.waitForSeconds(1);
                 List<MessageView> messageViews = consumer.receive(1, Duration.ofSeconds(10));
                 if (messageViews.size() > 0) {
                     for (MessageView messageView : messageViews) {

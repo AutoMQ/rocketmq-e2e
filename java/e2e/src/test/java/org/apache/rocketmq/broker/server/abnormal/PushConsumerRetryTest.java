@@ -166,6 +166,7 @@ public class PushConsumerRetryTest extends BaseOperate {
                 return recvMessages.size() == SEND_NUM;
             }
         });
+
         for (int i = 0; i < SEND_NUM; i++) {
             Assertions.assertEquals(i, Integer.parseInt(StandardCharsets.UTF_8.decode(recvMessages.get(i).getBody()).toString()), "recv message failed");
         }

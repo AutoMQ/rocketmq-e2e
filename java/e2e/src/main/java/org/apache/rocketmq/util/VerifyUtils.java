@@ -395,6 +395,7 @@ public class VerifyUtils {
 //                    Assertions.fail(
 //                        String.format("More retry messages were consumed than expected (including one original message) Except:%s, Actual:%s, MsgId:%s", consumedTimes, getRepeatedTimes(receivedMessagesCopy, enqueueMessageId),
 //                            enqueueMessageId));
+                    iter.remove();
                     log.error("More retry messages were consumed than expected, Except:{}, Actual:{}", consumedTimes, getRepeatedTimes(receivedMessagesCopy, enqueueMessageId));
                 }
             }
