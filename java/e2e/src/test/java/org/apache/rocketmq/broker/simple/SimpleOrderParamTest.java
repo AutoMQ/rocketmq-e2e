@@ -80,7 +80,7 @@ public class SimpleOrderParamTest extends BaseOperate {
         String groupId = getOrderlyGroupId(methodName);
 
         SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(consumer);
+//        VerifyUtils.tryReceiveOnce(consumer);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
         String orderId = RandomUtils.getStringByUUID();
