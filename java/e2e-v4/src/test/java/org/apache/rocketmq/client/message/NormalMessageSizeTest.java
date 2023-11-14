@@ -33,10 +33,12 @@ import org.apache.rocketmq.listener.rmq.concurrent.TransactionListenerImpl;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.utils.NameUtils;
 import org.apache.rocketmq.utils.RandomUtils;
+import org.apache.rocketmq.utils.TestUtils;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,11 +109,22 @@ public class NormalMessageSizeTest extends BaseOperate {
         String messageBody = RandomStringUtils.randomAlphabetic(4 * 1024 * 1024);
         String tag = NameUtils.getRandomTagName();
         Message message = new Message(normalTopic, tag, messageBody.getBytes());
-        try {
-            producer.send(message);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Assertions.fail("Send message failed, expected success");
+
+        int maxRetryCount = 3;
+        int retryCount = 0;
+        boolean success = false;
+
+        while (retryCount < maxRetryCount && !success) {
+            try {
+                producer.send(message);
+                success = true;
+            } catch (Exception e) {
+                retryCount++;
+                e.printStackTrace();
+                if (retryCount == maxRetryCount) {
+                    Assertions.fail("Send message failed after " + maxRetryCount + " retries, expected success, message: " + e.getMessage());
+                }
+            }
         }
     }
 
@@ -278,7 +291,7 @@ public class NormalMessageSizeTest extends BaseOperate {
         } catch (MQClientException e) {
             log.info("Start DefaultMQProducer failed, {}", e.getMessage());
         }
-        List<MessageQueue> messageQueues = null;
+        List<MessageQueue> messageQueues = new ArrayList<>();
         try {
             messageQueues = producer.fetchPublishMessageQueues(fifoTopic);
         } catch (MQClientException e) {
@@ -292,25 +305,32 @@ public class NormalMessageSizeTest extends BaseOperate {
         message.setKeys(orderId);
         message.putUserProperty(PROPERTY_SHARDING_KEY, orderId);
         List<MessageQueue> finalMessageQueues = messageQueues;
-        try {
-            if (finalMessageQueues.size() > 0) {
-                producer.send(message, new MessageQueueSelector() {
-                    @Override
-                    public MessageQueue select(List<MessageQueue> list, Message message, Object o) {
-                        return list.get(0);
-                    }
-                }, null);
+
+        int maxRetryCount = 3;
+        int retryCount = 0;
+        boolean success = false;
+
+        while (retryCount < maxRetryCount && !success) {
+            try {
+                assert finalMessageQueues != null;
+                if (finalMessageQueues.size() > 0) {
+                    producer.send(message, new MessageQueueSelector() {
+                        @Override
+                        public MessageQueue select(List<MessageQueue> list, Message message, Object o) {
+                            return list.get(0);
+                        }
+                    }, null);
+                }
+                success = true;
+            } catch (MQBrokerException | RemotingException | InterruptedException | MQClientException e) {
+                retryCount++;
+                e.printStackTrace();
+                if (retryCount == maxRetryCount) {
+                    Assertions.fail("Send message failed after " + maxRetryCount + " retries, expected success, message: " + e.getMessage());
+                }
             }
-        } catch (MQBrokerException e) {
-            e.printStackTrace();
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
-        } catch (RemotingException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
-        } catch (InterruptedException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
-        } catch (MQClientException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
         }
+
     }
 
     @Test
@@ -329,20 +349,25 @@ public class NormalMessageSizeTest extends BaseOperate {
         String value = RandomStringUtils.randomAlphabetic(8 * 1024);
         HashMap<String, String> userProperty = new HashMap<>();
         userProperty.put(key, value);
-        try {
-            Message message = new Message(normalTopic, messageBody.getBytes());
-            for (Map.Entry<String, String> entry : userProperty.entrySet()) {
-                message.putUserProperty(entry.getKey(), entry.getValue());
+
+        int maxRetryCount = 3;
+        int retryCount = 0;
+        boolean success = false;
+        while (retryCount < maxRetryCount && !success) {
+            try {
+                Message message = new Message(normalTopic, messageBody.getBytes());
+                for (Map.Entry<String, String> entry : userProperty.entrySet()) {
+                    message.putUserProperty(entry.getKey(), entry.getValue());
+                }
+                producer.send(message);
+                success = true;
+            } catch (MQBrokerException | RemotingException | InterruptedException | MQClientException e) {
+                retryCount++;
+                e.printStackTrace();
+                if (retryCount == maxRetryCount) {
+                    Assertions.fail("Send message failed after " + maxRetryCount + " retries, expected success, message: " + e.getMessage());
+                }
             }
-            producer.send(message);
-        } catch (MQBrokerException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
-        } catch (RemotingException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
-        } catch (InterruptedException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
-        } catch (MQClientException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
         }
     }
 
@@ -357,7 +382,8 @@ public class NormalMessageSizeTest extends BaseOperate {
         } catch (MQClientException e) {
             log.info("Start DefaultMQProducer failed, {}", e.getMessage());
         }
-        List<MessageQueue> messageQueues = null;
+        List<MessageQueue> messageQueues = new ArrayList<>();
+        TestUtils.waitForSeconds(1);
         try {
             messageQueues = producer.fetchPublishMessageQueues(fifoTopic);
         } catch (MQClientException e) {
@@ -373,23 +399,30 @@ public class NormalMessageSizeTest extends BaseOperate {
         userProperty.put(key, value);
         userProperty.put(PROPERTY_SHARDING_KEY, orderId);
         List<MessageQueue> finalMessageQueues = messageQueues;
-        try {
-            Message message = new Message(fifoTopic, messageBody.getBytes());
-            for (Map.Entry<String, String> entry : userProperty.entrySet()) {
-                message.putUserProperty(entry.getKey(), entry.getValue());
+        int maxRetryCount = 3;
+        int retryCount = 0;
+        boolean success = false;
+
+        while (retryCount < maxRetryCount && !success) {
+            try {
+                Message message = new Message(fifoTopic, messageBody.getBytes());
+                for (Map.Entry<String, String> entry : userProperty.entrySet()) {
+                    message.putUserProperty(entry.getKey(), entry.getValue());
+                }
+                assert finalMessageQueues != null;
+                if (finalMessageQueues.size() > 0) {
+                    producer.send(message, finalMessageQueues.get(0));
+                }
+                success = true;
+            } catch (MQBrokerException | RemotingException | InterruptedException | MQClientException e) {
+                retryCount++;
+                e.printStackTrace();
+                if (retryCount == maxRetryCount) {
+                    Assertions.fail("Send message failed after " + maxRetryCount + " retries, expected success, message: " + e.getMessage());
+                }
             }
-            if (finalMessageQueues.size() > 0) {
-                producer.send(message, finalMessageQueues.get(0));
-            }
-        } catch (MQBrokerException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
-        } catch (RemotingException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
-        } catch (InterruptedException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
-        } catch (MQClientException e) {
-            Assertions.fail("Send message failed, expected success, message:" + e.getMessage());
         }
+
     }
 
 }

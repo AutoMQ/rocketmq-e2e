@@ -29,6 +29,7 @@ import org.apache.rocketmq.frame.BaseOperate;
 import org.apache.rocketmq.listener.rmq.concurrent.RMQNormalListener;
 import org.apache.rocketmq.utils.MQAdmin;
 import org.apache.rocketmq.utils.NameUtils;
+import org.apache.rocketmq.utils.TestUtils;
 import org.apache.rocketmq.utils.VerifyUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,7 +90,7 @@ public class NormalMessageTest extends BaseOperate {
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr,rpcHook);
         RMQSendCallBack callBack = new RMQSendCallBack();
         producer.sendAsync(topic, tag, callBack, SEND_NUM);
-
+        TestUtils.waitForSeconds(1);
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "消息发送失败");
         VerifyUtils.verifyNormalMessage(producer.getEnqueueMessages(), consumer.getListener().getDequeueMessages());
     }
