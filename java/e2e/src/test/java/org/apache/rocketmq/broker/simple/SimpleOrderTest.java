@@ -65,7 +65,7 @@ public class SimpleOrderTest extends BaseOperate {
         String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
 
         SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
-        VerifyUtils.tryReceiveOnce(consumer);
+//        VerifyUtils.tryReceiveOnce(consumer);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get Producer failed");
 

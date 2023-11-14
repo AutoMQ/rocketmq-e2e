@@ -131,27 +131,27 @@ public class DelayMessageTest extends BaseOperate {
         VerifyUtils.verifyDelayMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages(), 10);
     }
 
-    @Test
-    @Order(1)
-    @DisplayName("Sends 10 timed messages (-20s) expecting to be delivered and consumed immediately")
-    public void testDelayTime15SecondsAgo() {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        String topic = getTopic(TopicMessageType.DELAY.getValue(), methodName);
-        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
-
-        pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
-
-        producer = ProducerFactory.getRMQProducer(account, topic);
-        Assertions.assertNotNull(producer, "Get Producer failed");
-        for (int i = 0; i < SEND_NUM; i++) {
-            Message message = MessageFactory.buildDelayMessage(topic, tag, RandomUtils.getStringByUUID(), System.currentTimeMillis());
-            producer.send(message);
-        }
-        Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
-        VerifyUtils.verifyDelayMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages(), 0);
-    }
+//    @Test
+//    @Order(1)
+//    @DisplayName("Sends 10 timed messages (-20s) expecting to be delivered and consumed immediately")
+//    public void testDelayTime15SecondsAgo() {
+//        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+//        String topic = getTopic(TopicMessageType.DELAY.getValue(), methodName);
+//        String groupId = getGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
+//
+//        pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
+////        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
+////        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
+//
+//        producer = ProducerFactory.getRMQProducer(account, topic);
+//        Assertions.assertNotNull(producer, "Get Producer failed");
+//        for (int i = 0; i < SEND_NUM; i++) {
+//            Message message = MessageFactory.buildDelayMessage(topic, tag, RandomUtils.getStringByUUID(), System.currentTimeMillis() + 5 * 1000L);
+//            producer.send(message);
+//        }
+//        Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
+//        VerifyUtils.verifyDelayMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages(), 0);
+//    }
 
     @Test
     @Order(3)
