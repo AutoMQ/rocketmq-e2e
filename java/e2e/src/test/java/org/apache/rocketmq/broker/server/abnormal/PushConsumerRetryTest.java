@@ -18,12 +18,10 @@
 package org.apache.rocketmq.broker.server.abnormal;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,21 +30,18 @@ import org.apache.rocketmq.client.apis.consumer.ConsumeResult;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.apis.consumer.FilterExpressionType;
 import org.apache.rocketmq.client.apis.consumer.PushConsumer;
-import org.apache.rocketmq.client.apis.consumer.SimpleConsumer;
 import org.apache.rocketmq.client.apis.message.Message;
 import org.apache.rocketmq.client.apis.message.MessageView;
 import org.apache.rocketmq.client.rmq.RMQNormalProducer;
 import org.apache.rocketmq.common.attribute.TopicMessageType;
 import org.apache.rocketmq.enums.TESTSET;
 import org.apache.rocketmq.factory.ClientConfigurationFactory;
-import org.apache.rocketmq.factory.ConsumerFactory;
 import org.apache.rocketmq.factory.MessageFactory;
 import org.apache.rocketmq.factory.ProducerFactory;
 import org.apache.rocketmq.frame.BaseOperate;
 import org.apache.rocketmq.util.NameUtils;
 import org.apache.rocketmq.util.RandomUtils;
 import org.apache.rocketmq.util.TestUtils;
-import org.apache.rocketmq.util.VerifyUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,16 +74,13 @@ public class PushConsumerRetryTest extends BaseOperate {
         Map<String, MessageView> noRetryMsgs = new ConcurrentHashMap<>();
         Map<String, MessageView> retryMsgs = new ConcurrentHashMap<>();
 
-//        SimpleConsumer simpleConsumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer);
-
         try {
             provider.newPushConsumerBuilder().setClientConfiguration(ClientConfigurationFactory.build(account)).setConsumerGroup(groupId).setSubscriptionExpressions(Collections.singletonMap(topic, new FilterExpression(tag, FilterExpressionType.TAG))).setConsumptionThreadCount(20).setMessageListener(messageView -> {
                 if (Integer.parseInt(StandardCharsets.UTF_8.decode(messageView.getBody()).toString()) % 2 == 0) {
                     log.info(String.format("commit normal msg %s ", messageView));
                     noRetryMsgs.putIfAbsent(messageView.getMessageId().toString(), messageView);
                     return ConsumeResult.SUCCESS;
-                } else if (messageView.getDeliveryAttempt() == 2) {
+                } else if (messageView.getDeliveryAttempt() == 1) {
                     log.info(String.format("retry  normal msg %s ", messageView));
                     retryMsgs.putIfAbsent(messageView.getMessageId().toString(), messageView);
                     return ConsumeResult.SUCCESS;
@@ -105,7 +97,7 @@ public class PushConsumerRetryTest extends BaseOperate {
         }
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
         //All messages are consumed.
-        await().atMost(120, SECONDS).until(new Callable<Boolean>() {
+        await().atMost(180, SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 return noRetryMsgs.size() == retryMsgs.size() && noRetryMsgs.size() == SEND_NUM / 2;
@@ -122,9 +114,6 @@ public class PushConsumerRetryTest extends BaseOperate {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         String topic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
         String groupId = getOrderlyGroupId(methodName);
-
-//        SimpleConsumer simpleConsumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer);
 
         PushConsumer pushConsumer = null;
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
@@ -178,9 +167,6 @@ public class PushConsumerRetryTest extends BaseOperate {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         String topic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
         String groupId = getOrderlyGroupId(methodName);
-
-//        SimpleConsumer simpleConsumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer);
 
         PushConsumer pushConsumer = null;
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);

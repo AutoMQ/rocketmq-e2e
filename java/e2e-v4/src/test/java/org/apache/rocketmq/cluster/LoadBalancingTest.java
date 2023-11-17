@@ -174,10 +174,6 @@ public class LoadBalancingTest extends BaseOperate {
         String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);
 
-//        RMQNormalConsumer pullConsumer = ConsumerFactory.getRMQLitePullConsumer(namesrvAddr, groupId, rpcHook,1);
-//        pullConsumer.subscribeAndStartLitePull(topic,MessageSelector.byTag(tag));
-//        VerifyUtils.tryReceiveOnce(pullConsumer.getLitePullConsumer());
-//        pullConsumer.shutdown();
 
         RMQNormalConsumer consumer1 = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook,new AllocateMessageQueueAveragely());
         RMQNormalConsumer consumer2 = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook,new AllocateMessageQueueAveragely());
@@ -231,10 +227,6 @@ public class LoadBalancingTest extends BaseOperate {
         String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);
 
-//        RMQNormalConsumer pullConsumer = ConsumerFactory.getRMQLitePullConsumer(namesrvAddr, groupId, rpcHook,1);
-//        pullConsumer.subscribeAndStartLitePull(topic,MessageSelector.byTag(tag));
-//        VerifyUtils.tryReceiveOnce(pullConsumer.getLitePullConsumer());
-//        pullConsumer.shutdown();
 
         RMQNormalConsumer consumer1 = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook,new AllocateMessageQueueAveragely());
         RMQNormalConsumer consumer2 = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook,new AllocateMessageQueueAveragely());
