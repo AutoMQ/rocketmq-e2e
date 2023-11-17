@@ -17,7 +17,6 @@
 
 package org.apache.rocketmq.broker.filter.push;
 
-import java.time.Duration;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
@@ -31,14 +30,12 @@ import org.apache.rocketmq.listener.rmq.RMQNormalListener;
 import org.apache.rocketmq.util.NameUtils;
 import org.apache.rocketmq.util.TestUtils;
 import org.apache.rocketmq.util.VerifyUtils;
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,8 +76,7 @@ public class TagFilterTest extends BaseOperate {
         String sendTag = NameUtils.getRandomTagName();
         String receiveTag = sendTag + "||TagB";
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(receiveTag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(receiveTag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
+
         log.info("Wait for the SimpleConsumer");
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);
@@ -101,8 +97,7 @@ public class TagFilterTest extends BaseOperate {
         String sendTagB = NameUtils.getRandomTagName();
         String receiveTag = sendTagA + "||" + sendTagB;
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(receiveTag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(receiveTag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
+
         producer = ProducerFactory.getRMQProducer(account, topic);
         TestUtils.waitForSeconds(1);
         Assertions.assertNotNull(producer);
@@ -124,8 +119,6 @@ public class TagFilterTest extends BaseOperate {
         String sendTagB = NameUtils.getRandomTagName();
         String receiveTag = "*";
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(receiveTag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(receiveTag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);
@@ -146,8 +139,6 @@ public class TagFilterTest extends BaseOperate {
         String sendTagA = NameUtils.getRandomTagName();
         String receiveTag = NameUtils.getRandomTagName();
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(receiveTag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(receiveTag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);
@@ -167,8 +158,6 @@ public class TagFilterTest extends BaseOperate {
 
         String sendTag = NameUtils.getRandomTagName();
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(sendTag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(sendTag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);
@@ -187,8 +176,6 @@ public class TagFilterTest extends BaseOperate {
 
         String sendTag = RandomStringUtils.randomAlphanumeric(1024 * 10);
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(sendTag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(sendTag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);
@@ -209,9 +196,6 @@ public class TagFilterTest extends BaseOperate {
         String sendTagB = NameUtils.getRandomTagName();
         String receiveTag = " " + sendTagA + " || " + sendTagB + " ";
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(receiveTag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(receiveTag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
-
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);
         producer.send(topic, sendTagA, SEND_NUM);
@@ -243,8 +227,6 @@ public class TagFilterTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression("*"), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression("*"), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);
@@ -265,8 +247,6 @@ public class TagFilterTest extends BaseOperate {
         String sendTagB = NameUtils.getRandomTagName();
         String receiveTag = sendTagA + "||||" + sendTagB;
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(receiveTag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(receiveTag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);
@@ -309,8 +289,6 @@ public class TagFilterTest extends BaseOperate {
         String sendTagB = "Aa";
         String receiveTag = "BB";
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(receiveTag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(receiveTag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);
@@ -333,8 +311,6 @@ public class TagFilterTest extends BaseOperate {
         String sendTagB = "bb";
         String receiveTag = "BB";
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(receiveTag), new RMQNormalListener());
-//        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(receiveTag), Duration.ofSeconds(10));
-//        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer);

@@ -24,7 +24,6 @@ import org.apache.rocketmq.client.rmq.RMQNormalProducer;
 import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.enums.TESTSET;
 import org.apache.rocketmq.factory.ConsumerFactory;
-import org.apache.rocketmq.factory.MessageFactory;
 import org.apache.rocketmq.factory.ProducerFactory;
 import org.apache.rocketmq.frame.BaseOperate;
 import org.apache.rocketmq.utils.NameUtils;
@@ -34,7 +33,6 @@ import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +59,6 @@ public class PullOrderTest extends BaseOperate {
 
         RMQNormalConsumer consumer = ConsumerFactory.getRMQPullConsumer(namesrvAddr, groupId, rpcHook);
         consumer.startDefaultPull();
-        // VerifyUtils.tryReceiveOnce(consumer.getPullConsumer(), topic, tag, 32);
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);
         Assertions.assertNotNull(producer, "Get producer failed");
 

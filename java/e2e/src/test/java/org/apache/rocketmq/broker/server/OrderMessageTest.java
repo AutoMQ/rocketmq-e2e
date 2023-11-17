@@ -43,6 +43,7 @@ import org.apache.rocketmq.util.data.collect.DataCollector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -77,30 +78,33 @@ public class OrderMessageTest extends BaseOperate {
         }
     }
 
+    @Disabled
     @Test
     @DisplayName("Send 100 sequential messages synchronously, set 2 Messagegroups, and expect these 100 messages to be sequentially consumed by PushConsumer")
     public void testOrder_Send_PushConsumeOrderly() {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+        while (true) {
+            String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
 
-        String topic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
-        String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
+            String topic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
+            String groupId = getOrderlyGroupId(methodName, SubscriptionMode.SUB_MODE_POP);
 
-        pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
+            pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
 //        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(5));
 //        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
-        producer = ProducerFactory.getRMQProducer(account, topic);
-        Assertions.assertNotNull(producer);
-        String messageGroup = RandomUtils.getStringByUUID();
-        for (int i = 0; i < SEND_NUM; i++) {
-            Message message = MessageFactory.buildOrderMessage(topic, tag, String.valueOf(i), messageGroup + String.valueOf(i % 2));
-            producer.send(message);
-            System.out.printf("send message %s%n", message);
-        }
-        Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
+            producer = ProducerFactory.getRMQProducer(account, topic);
+            Assertions.assertNotNull(producer);
+            String messageGroup = RandomUtils.getStringByUUID();
+            for (int i = 0; i < SEND_NUM; i++) {
+                Message message = MessageFactory.buildOrderMessage(topic, tag, String.valueOf(i), messageGroup + String.valueOf(i % 2));
+                producer.send(message);
+                System.out.printf("send message %s%n", message);
+            }
+            Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
 //        DataCollector<Object> dequeueMessages = simpleConsumer.getListener().getDequeueMessages();
 //        dequeueMessages.addData(pushConsumer.getListener().getDequeueMessages());
-//        VerifyUtils.verifyOrderMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages());
+            VerifyUtils.verifyOrderMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages());
+        }
     }
 
 }

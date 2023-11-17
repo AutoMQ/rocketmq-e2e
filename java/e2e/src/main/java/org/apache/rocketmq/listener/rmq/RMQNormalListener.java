@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.rocketmq.client.apis.consumer.ConsumeResult;
 import org.apache.rocketmq.client.apis.consumer.MessageListener;
 import org.apache.rocketmq.client.apis.message.MessageView;
+import org.apache.rocketmq.client.java.message.MessageViewImpl;
 import org.apache.rocketmq.common.MQCollector;
 import org.apache.rocketmq.util.RandomUtils;
 import org.apache.rocketmq.util.TestUtils;
@@ -81,8 +82,10 @@ public class RMQNormalListener extends MQCollector implements MessageListener {
             }
             TestUtils.waitForSeconds(workTime);
         }
-
-        logger.info("consume message {} - MessageId:{}, body:{}, tag:{},  key:{}, recvIndex:{}, property:{}, action:{}", listenerName, view.getMessageId(), StandardCharsets.UTF_8.decode(view.getBody()), view.getTag().isPresent() ? view.getTag().get() : "", view.getKeys(), msgIndex.getAndIncrement() + 1, view.getProperties(), consumeStatus);
+        MessageViewImpl view1 = (MessageViewImpl) view;
+        logger.info("consume message {} - MessageId:{}, QueueId:{}, QueueOffset:{}, body:{}, tag:{},  key:{}, recvIndex:{}, property:{}, action:{}, messageGroup:{}",
+            listenerName, view.getMessageId(), view1.getMessageQueue().getQueueId(), view1.getOffset(), StandardCharsets.UTF_8.decode(view.getBody()), view.getTag().isPresent() ?
+                view.getTag().get() : "", view.getKeys(), msgIndex.getAndIncrement() + 1, view.getProperties(), consumeStatus, view.getMessageGroup());
         return result;
     }
 }

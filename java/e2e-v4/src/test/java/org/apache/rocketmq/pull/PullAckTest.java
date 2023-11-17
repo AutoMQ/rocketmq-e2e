@@ -17,7 +17,6 @@
 
 package org.apache.rocketmq.pull;
 
-import org.apache.rocketmq.client.consumer.DefaultMQPullConsumer;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.client.rmq.RMQNormalConsumer;
 import org.apache.rocketmq.client.rmq.RMQNormalProducer;
