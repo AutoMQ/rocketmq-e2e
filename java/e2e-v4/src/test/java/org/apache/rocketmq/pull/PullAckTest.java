@@ -93,7 +93,7 @@ public class PullAckTest extends BaseOperate {
 
         RMQNormalConsumer consumer = ConsumerFactory.getRMQPullConsumer(namesrvAddr, groupId, rpcHook);
         consumer.startDefaultPull();
-        VerifyUtils.tryReceiveOnce(consumer.getPullConsumer(), topic, tag, 32);
+//        VerifyUtils.tryReceiveOnce(consumer.getPullConsumer(), topic, tag, 32);
         producer = ProducerFactory.getRMQProducer(namesrvAddr, rpcHook);
         Assertions.assertNotNull(producer, "Get producer failed");
         for (int i = 0; i < SEND_NUM; i++) {

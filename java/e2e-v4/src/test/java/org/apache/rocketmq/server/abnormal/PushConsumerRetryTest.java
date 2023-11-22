@@ -56,7 +56,6 @@ import org.apache.rocketmq.frame.BaseOperate;
 import org.apache.rocketmq.utils.NameUtils;
 import org.apache.rocketmq.utils.RandomUtils;
 import org.apache.rocketmq.utils.TestUtils;
-import org.apache.rocketmq.utils.VerifyUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -332,7 +331,7 @@ public class PushConsumerRetryTest extends BaseOperate {
         TestUtils.waitForSeconds(15);
 
         Assertions.assertEquals(SEND_NUM, msgsRecv.size(),
-                "retry message size is not equal to send message size");
+            "retry message size is not equal to send message size");
 
         producer.shutdown();
         pushConsumer.shutdown();
@@ -422,7 +421,7 @@ public class PushConsumerRetryTest extends BaseOperate {
                         ConsumeOrderlyContext context) {
                     for (MessageExt msg : msgs) {
                         log.info(String.format("recv msgid(reconsume later) %s, reconsume time is %s ", msg.getMsgId(),
-                                msg.getReconsumeTimes()));
+                            msg.getReconsumeTimes()));
                         msgsReConsumeTimes.put(msg.getMsgId(), msg.getReconsumeTimes());
                     }
                     return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
@@ -444,7 +443,7 @@ public class PushConsumerRetryTest extends BaseOperate {
         TestUtils.waitForMinutes(2);
 
         Assertions.assertEquals(2, msgsReConsumeTimes.size(),
-                "retry message size is not equal to send message size");
+            "retry message size is not equal to send message size");
         for (Map.Entry<String, Integer> entry : msgsReConsumeTimes.entrySet()) {
             Assertions.assertTrue(30 == entry.getValue(), "retry times is not equal to maxReconsumeTimes(30)");
         }
@@ -480,7 +479,7 @@ public class PushConsumerRetryTest extends BaseOperate {
                         String body = String.valueOf(StandardCharsets.UTF_8.decode(ByteBuffer.wrap(msg.getBody())));
                         if ("0".equals(body)) {
                             log.info(String.format("recv msgid(first message) %s, reconsume time is %s ",
-                                    msg.getMsgId(), msg.getReconsumeTimes()));
+                                msg.getMsgId(), msg.getReconsumeTimes()));
                             return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
                         } else {
                             msgsReConsumeTimes.putIfAbsent(msg.getMsgId(), msg.getReconsumeTimes());
@@ -506,7 +505,7 @@ public class PushConsumerRetryTest extends BaseOperate {
         TestUtils.waitForSeconds(30);
 
         Assertions.assertEquals(SEND_NUM - 1, msgsReConsumeTimes.size(),
-                "retry message size is not equal to send message size");
+            "retry message size is not equal to send message size");
 
         producer.shutdown();
         pushConsumer.shutdown();
@@ -764,7 +763,7 @@ public class PushConsumerRetryTest extends BaseOperate {
         });
         for (MessageExt messageExt : producer.getEnqueueMessages().getAllData()) {
             Assertions.assertTrue(firstMsgs.containsKey(messageExt.getMsgId().toString())
-                    || retryMsgs.containsKey(messageExt.getMsgId().toString()));
+                || retryMsgs.containsKey(messageExt.getMsgId().toString()));
         }
         producer.shutdown();
         pushConsumer.shutdown();
@@ -825,9 +824,9 @@ public class PushConsumerRetryTest extends BaseOperate {
         });
         for (int i = 0; i < SEND_NUM; i++) {
             Assertions.assertEquals(i,
-                    Integer.parseInt(String
-                            .valueOf(StandardCharsets.UTF_8.decode(ByteBuffer.wrap(recvMessages.get(i).getBody())))),
-                    "recv message failed");
+                Integer.parseInt(String
+                    .valueOf(StandardCharsets.UTF_8.decode(ByteBuffer.wrap(recvMessages.get(i).getBody())))),
+                "recv message failed");
         }
     }
 }

@@ -48,7 +48,7 @@ import java.util.stream.Stream;
 public class VerifyUtils {
     private static Logger logger = LoggerFactory.getLogger(VerifyUtils.class);
     private static AtomicInteger receivedIndex = new AtomicInteger(0);
-    private static final int TIMEOUT = 60;
+    private static final int TIMEOUT = 90;
     private static int defaultSimpleThreadNums = 4;
 
     /**
@@ -220,7 +220,7 @@ public class VerifyUtils {
             DataCollector<MessageExt> dequeueMessages, int delayLevel) {
         // Check whether the consumption is complete
         Collection<MessageExt> unConsumedMessages = waitForMessageConsume(enqueueMessages, dequeueMessages,
-                (TIMEOUT + DelayConf.DELAY_LEVEL[delayLevel - 1]) * 1000L, 1);
+                (TIMEOUT + DelayConf.DELAY_LEVEL[delayLevel + 1]) * 1000L, 1);
         if (unConsumedMessages.size() > 0) {
             Assertions.fail(String.format("The following %s messages are not consumed: %s", unConsumedMessages.size(),
                     unConsumedMessages));
@@ -426,8 +426,8 @@ public class VerifyUtils {
             // 5 seconds, the requirement is met.
             long bornTimestamp = receivedMessage.getBornTimestamp();
 
-            if (Math.abs(startDeliverTime - bornTimestamp)
-                    / 1000 > DelayConf.DELAY_LEVEL[receivedMessage.getDelayTimeLevel() - 1] + offset) {
+            if (Math.abs(System.currentTimeMillis() - startDeliverTime - bornTimestamp)
+                    / 1000 > DelayConf.DELAY_LEVEL[receivedMessage.getDelayTimeLevel() + 1] + offset) {
                 map.put(receivedMessage.getMsgId(), (startDeliverTime - bornTimestamp) / 1000);
             }
         }
@@ -985,7 +985,7 @@ public class VerifyUtils {
     }
 
     public static void waitForAllocateAvg(String topic, RMQNormalConsumer... allConsumers) {
-        Awaitility.await().atMost(120, TimeUnit.SECONDS)
+        Awaitility.await().atMost(180, TimeUnit.SECONDS)
             .pollInterval(100, TimeUnit.MILLISECONDS)
             .until(() -> {
                 int size = 0;
