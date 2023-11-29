@@ -18,7 +18,6 @@
 package org.apache.rocketmq.frame;
 
 import apache.rocketmq.controller.v1.AcceptTypes;
-import apache.rocketmq.controller.v1.CreateGroupReply;
 import apache.rocketmq.controller.v1.CreateGroupRequest;
 import apache.rocketmq.controller.v1.CreateTopicRequest;
 import apache.rocketmq.controller.v1.GroupType;
@@ -94,7 +93,7 @@ public class BaseOperate extends ResourceInit {
             .setGroupType(GroupType.GROUP_TYPE_STANDARD)
             .setSubMode(mode)
             .build();
-        CreateGroupReply reply = createConsumerGroup(request).join();
+        Long reply = createConsumerGroup(request).join();
         logger.info("[ConsumerGroupId] groupId:{} , methodName:{} , mode: {} , reply:{}", groupId, methodName, mode, reply);
         return groupId;
     }
@@ -107,14 +106,14 @@ public class BaseOperate extends ResourceInit {
             .setGroupType(GroupType.GROUP_TYPE_FIFO)
             .setSubMode(mode)
             .build();
-        CreateGroupReply reply = createConsumerGroup(request).join();
+        Long reply = createConsumerGroup(request).join();
         logger.info("[ConsumerGroupId] groupId:{} methodName:{} reply:{}", groupId, methodName, reply);
         return groupId;
     }
 
-    private static CompletableFuture<CreateGroupReply> createConsumerGroup(CreateGroupRequest request) {
+    private static CompletableFuture<Long> createConsumerGroup(CreateGroupRequest request) {
         try {
-            CompletableFuture<CreateGroupReply> groupCf = client.createGroup(namesrvAddr, request);
+            CompletableFuture<Long> groupCf = client.createGroup(namesrvAddr, request);
             return groupCf.exceptionally(throwable -> {
                 logger.error("Create group failed", throwable);
                 throw new CompletionException(throwable);
