@@ -94,6 +94,7 @@ public class TransactionListenerImpl extends AbstractListener implements Transac
         // }
         // }
         // 本地事务已成功则提交消息
+        System.out.println("checkLocalTransaction: commit");
         return checker;
     }
 }

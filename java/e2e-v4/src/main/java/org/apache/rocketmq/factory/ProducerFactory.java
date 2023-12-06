@@ -27,6 +27,7 @@ import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.utils.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.stringtemplate.v4.ST;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -58,6 +59,27 @@ public class ProducerFactory {
             producer = new TransactionMQProducer(RandomUtils.getStringByUUID(), rpcHook);
         } else {
             producer = new TransactionMQProducer(RandomUtils.getStringByUUID());
+        }
+        producer.setInstanceName(UUID.randomUUID().toString());
+        producer.setNamesrvAddr(ns);
+        try {
+            if (executorService != null) {
+                producer.setExecutorService(executorService);
+            }
+            producer.setTransactionListener(transactionListener);
+            producer.start();
+        } catch (MQClientException e) {
+            logger.info("Start TransactionMQProducer failed, {}", e.getMessage());
+        }
+        return new RMQTransactionProducer(producer);
+    }
+
+    public static RMQTransactionProducer getTransProducer(String ns, String groupName, ExecutorService executorService, TransactionListener transactionListener, RPCHook rpcHook) {
+        TransactionMQProducer producer;
+        if (aclEnable) {
+            producer = new TransactionMQProducer(groupName, rpcHook);
+        } else {
+            producer = new TransactionMQProducer(groupName);
         }
         producer.setInstanceName(UUID.randomUUID().toString());
         producer.setNamesrvAddr(ns);

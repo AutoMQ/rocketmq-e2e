@@ -83,7 +83,6 @@ public class SimpleTopicTypeTest extends BaseOperate {
         VerifyUtils.waitDelayReceiveThenAck(producer, consumer, 1, 10000);
     }
 
-    @Disabled
     @Test
     @DisplayName("Send 10 transaction messages synchronously and expect SimpleConsumer to receive() and ack() messages properly")
     public void testTrans_simple_receive_ackAsync() {
@@ -93,7 +92,6 @@ public class SimpleTopicTypeTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         SimpleConsumer consumer = ConsumerFactory.getSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(consumer);
         RMQNormalProducer producer = ProducerFactory.getRMQTransProducer(account, topic, new LocalTransactionCheckerImpl(TransactionResolution.COMMIT));
         Assertions.assertNotNull(producer, "Get Producer failed");
         for (int i = 0; i < SEND_NUM; i++) {

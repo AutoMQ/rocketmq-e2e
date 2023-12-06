@@ -17,6 +17,8 @@
 
 package org.apache.rocketmq.server.transaction;
 
+import apache.rocketmq.controller.v1.MessageType;
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.TransactionListener;
@@ -30,7 +32,6 @@ import org.apache.rocketmq.factory.ProducerFactory;
 import org.apache.rocketmq.frame.BaseOperate;
 import org.apache.rocketmq.listener.rmq.concurrent.RMQNormalListener;
 import org.apache.rocketmq.listener.rmq.concurrent.TransactionListenerImpl;
-import org.apache.rocketmq.utils.MQAdmin;
 import org.apache.rocketmq.utils.NameUtils;
 import org.apache.rocketmq.utils.TestUtils;
 import org.apache.rocketmq.utils.VerifyUtils;
@@ -56,7 +57,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
-@Disabled
 @Tag(TESTSET.TRANSACTION)
 @Tag(TESTSET.SMOKE)
 public class TransactionMessageTest extends BaseOperate {
@@ -68,16 +68,15 @@ public class TransactionMessageTest extends BaseOperate {
 
     @BeforeEach
     public void setUp() {
-        topic = NameUtils.getTopicName();
         tag = NameUtils.getTagName();
-        groupId = NameUtils.getGroupName();
-        MQAdmin.createTopic(namesrvAddr, cluster, topic, 8);
-        logger.info("topic:{}, tag:{}, groupId:{}", topic, tag, groupId);
     }
 
     @Test
     @DisplayName("Send 10 transaction messages synchronously, expecting all to be consumed")
     public void testConsumeNormalMessage() {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+        String topic = getTopic(MessageType.TRANSACTION, methodName);
+         String groupId = getGroupId(methodName);
         RMQNormalConsumer consumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         consumer.subscribeAndStart(topic, tag, new RMQNormalListener());
 
@@ -91,7 +90,7 @@ public class TransactionMessageTest extends BaseOperate {
                     }
                 });
 
-        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, executorService,
+        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, topic, executorService,
                 new TransactionListenerImpl(LocalTransactionState.COMMIT_MESSAGE, LocalTransactionState.COMMIT_MESSAGE),
                 rpcHook);
         producer.sendTrans(topic, tag, SEND_NUM);
@@ -105,7 +104,7 @@ public class TransactionMessageTest extends BaseOperate {
     @DisplayName("Send 10 transaction messages and rollback directly (Checker does commit), expecting that these 10 messages cannot be consumed by PushConsumer")
     public void testTrans_SendRollback_PushConsume() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        String topic = getTopic(methodName);
+        String topic = getTopic(MessageType.TRANSACTION, methodName);
         String groupId = getGroupId(methodName);
 
         RMQNormalConsumer pushConsumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
@@ -130,7 +129,8 @@ public class TransactionMessageTest extends BaseOperate {
         // message
         TestUtils.waitForSeconds(60);
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
-        Assertions.assertEquals(0, pushConsumer.getListener().getDequeueMessages().getDataSize());
+        Assertions.assertEquals(SEND_NUM, pushConsumer.getListener().getDequeueMessages().getDataSize());
+        Assertions.assertEquals(0, pushConsumer.getListener().getEnqueueMessages().getDataSize());
         producer.shutdown();
         pushConsumer.shutdown();
     }
@@ -140,7 +140,7 @@ public class TransactionMessageTest extends BaseOperate {
     public void testTrans_SendCheckerCommit_PushConsume() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
 
-        String topic = getTopic(methodName);
+        String topic = getTopic(MessageType.TRANSACTION, methodName);
         String groupId = getGroupId(methodName);
 
         RMQNormalConsumer pushConsumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
@@ -156,7 +156,7 @@ public class TransactionMessageTest extends BaseOperate {
                     }
                 });
 
-        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, executorService,
+        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, topic, executorService,
                 new TransactionListenerImpl(LocalTransactionState.COMMIT_MESSAGE, LocalTransactionState.UNKNOW),
                 rpcHook);
         producer.sendTrans(topic, tag, SEND_NUM);
@@ -173,7 +173,7 @@ public class TransactionMessageTest extends BaseOperate {
     @DisplayName("Send 10 transaction messages and roll back the transaction by Checker (performing ROLLBACK), expecting that the 10 messages will not be consumed by PushConsumer")
     public void testTrans_CheckerRollback() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        String topic = getTopic(methodName);
+        String topic = getTopic(MessageType.TRANSACTION, methodName);
         String groupId = getGroupId(methodName);
 
         RMQNormalConsumer pushConsumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
@@ -206,8 +206,8 @@ public class TransactionMessageTest extends BaseOperate {
     public void testTrans_SendCheckerPartionCommit() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
 
-        String topic = getTopic(methodName);
-        String groupId = getGroupId(methodName);
+        String topic = getTopic(MessageType.TRANSACTION, methodName);
+         String groupId = getGroupId(methodName);
 
         RMQNormalConsumer pushConsumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         pushConsumer.subscribeAndStart(topic, MessageSelector.byTag(tag), new RMQNormalListener());
@@ -225,7 +225,7 @@ public class TransactionMessageTest extends BaseOperate {
                     }
                 });
 
-        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, executorService,
+        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, topic, executorService,
                 new TransactionListener() {
 
                     @Override
@@ -253,6 +253,7 @@ public class TransactionMessageTest extends BaseOperate {
         await().atMost(90, SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() {
+                System.out.printf("rollbackMsg: %d, commitMsg: %d \n", rollbackMsgNum.get(), commitMsgNum.get());
                 return rollbackMsgNum.get() == commitMsgNum.get() && commitMsgNum.get() == SEND_NUM / 2;
             }
         });
