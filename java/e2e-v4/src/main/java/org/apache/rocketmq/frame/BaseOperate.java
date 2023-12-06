@@ -84,6 +84,18 @@ public class BaseOperate extends ResourceInit {
         return getGroupId(methodName, SubscriptionMode.SUB_MODE_PULL);
     }
 
+    protected static String getTransGroupId(String groupName, SubscriptionMode mode) {
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+            .setName(groupName)
+            .setMaxDeliveryAttempt(16)
+            .setGroupType(GroupType.GROUP_TYPE_STANDARD)
+            .setSubMode(mode)
+            .build();
+        Long reply = createConsumerGroup(request).join();
+        logger.info("[ConsumerGroupId] groupId:{} , mode: {} , reply:{}", groupName, mode, reply);
+        return groupName;
+    }
+
     protected static String getGroupId(String methodName, SubscriptionMode mode) {
         String groupId = String.format("GID_%s_%s", methodName, RandomUtils.getStringWithCharacter(6));
         // prepare consumer group

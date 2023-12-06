@@ -18,6 +18,7 @@
 package org.apache.rocketmq.server.transaction;
 
 import apache.rocketmq.controller.v1.MessageType;
+import apache.rocketmq.controller.v1.SubscriptionMode;
 import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.TransactionListener;
@@ -70,13 +71,12 @@ public class TransactionMessageTest extends BaseOperate {
         tag = NameUtils.getTagName();
     }
 
-    @Disabled
     @Test
     @DisplayName("Send 10 transaction messages synchronously, expecting all to be consumed")
     public void testConsumeNormalMessage() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         String topic = getTopic(MessageType.TRANSACTION, methodName);
-        String groupId = getGroupId(methodName);
+         String groupId = getGroupId(methodName);
         RMQNormalConsumer consumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         consumer.subscribeAndStart(topic, tag, new RMQNormalListener());
 
@@ -90,7 +90,7 @@ public class TransactionMessageTest extends BaseOperate {
                     }
                 });
 
-        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, executorService,
+        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, topic, executorService,
                 new TransactionListenerImpl(LocalTransactionState.COMMIT_MESSAGE, LocalTransactionState.COMMIT_MESSAGE),
                 rpcHook);
         producer.sendTrans(topic, tag, SEND_NUM);
@@ -129,12 +129,12 @@ public class TransactionMessageTest extends BaseOperate {
         // message
         TestUtils.waitForSeconds(60);
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
-        Assertions.assertEquals(0, pushConsumer.getListener().getDequeueMessages().getDataSize());
+        Assertions.assertEquals(SEND_NUM, pushConsumer.getListener().getDequeueMessages().getDataSize());
+        Assertions.assertEquals(0, pushConsumer.getListener().getEnqueueMessages().getDataSize());
         producer.shutdown();
         pushConsumer.shutdown();
     }
 
-    @Disabled
     @Test
     @DisplayName("Send 10 transaction messages and COMMIT the transaction by Checker (perform COMMIT), expecting the 10 messages to be consumed by PushConsumer")
     public void testTrans_SendCheckerCommit_PushConsume() {
@@ -156,7 +156,7 @@ public class TransactionMessageTest extends BaseOperate {
                     }
                 });
 
-        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, executorService,
+        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, topic, executorService,
                 new TransactionListenerImpl(LocalTransactionState.COMMIT_MESSAGE, LocalTransactionState.UNKNOW),
                 rpcHook);
         producer.sendTrans(topic, tag, SEND_NUM);
@@ -201,14 +201,13 @@ public class TransactionMessageTest extends BaseOperate {
         pushConsumer.shutdown();
     }
 
-    @Disabled
     @Test
     @DisplayName("Send 10 transactional messages and commit them by checking back (Checker commits for partial messages), and the expected committed messages can be consumed by PushConsumer")
     public void testTrans_SendCheckerPartionCommit() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
 
         String topic = getTopic(MessageType.TRANSACTION, methodName);
-        String groupId = getGroupId(methodName);
+         String groupId = getGroupId(methodName);
 
         RMQNormalConsumer pushConsumer = ConsumerFactory.getRMQNormalConsumer(namesrvAddr, groupId, rpcHook);
         pushConsumer.subscribeAndStart(topic, MessageSelector.byTag(tag), new RMQNormalListener());
@@ -226,7 +225,7 @@ public class TransactionMessageTest extends BaseOperate {
                     }
                 });
 
-        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, executorService,
+        RMQTransactionProducer producer = ProducerFactory.getTransProducer(namesrvAddr, topic, executorService,
                 new TransactionListener() {
 
                     @Override
