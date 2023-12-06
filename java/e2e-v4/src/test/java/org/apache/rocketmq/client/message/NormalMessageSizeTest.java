@@ -176,7 +176,6 @@ public class NormalMessageSizeTest extends BaseOperate {
         }
     }
 
-    @Disabled
     @Test
     @DisplayName("Send transaction messages synchronously with the body size of 4M+1, expect send failed")
     public void testTransMsgSize4MAdd1() {
@@ -212,7 +211,6 @@ public class NormalMessageSizeTest extends BaseOperate {
         producer.shutdown();
     }
 
-    @Disabled
     @Test
     @DisplayName("Send transaction messages synchronously with the body size of 4M, expect send success")
     public void testTransMsgSize4M() {

@@ -57,14 +57,14 @@ public class NormalMessageSizeTest extends BaseOperate {
     public static void setUpAll() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         normalTopic = getTopic(TopicMessageType.NORMAL.getValue(), methodName);
-//        transTopic = getTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
+        transTopic = getTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
         delayTopic = getTopic(TopicMessageType.DELAY.getValue(), methodName);
         fifoTopic = getTopic(TopicMessageType.FIFO.getValue(), methodName);
         try {
             producer = provider.newProducerBuilder()
                 .setTransactionChecker(messageView -> TransactionResolution.COMMIT)
                 .setClientConfiguration(ClientConfigurationFactory.build(account))
-                .setTopics(normalTopic, delayTopic, fifoTopic)
+                .setTopics(normalTopic, delayTopic, transTopic, fifoTopic)
                 .build();
         } catch (ClientException e) {
             Assertions.fail("create producer failed");
@@ -133,7 +133,6 @@ public class NormalMessageSizeTest extends BaseOperate {
         }
     }
 
-    @Disabled
     @Test
     @DisplayName("Send transaction messages synchronously with the body size of 4M+1, expect send failed")
     public void testTransMsgSize4MAdd1() {
@@ -147,7 +146,6 @@ public class NormalMessageSizeTest extends BaseOperate {
         });
     }
 
-    @Disabled
     @Test
     @DisplayName("Send transaction messages synchronously with the body size of 4M, expect send success")
     public void testTransMsgSize4M() {

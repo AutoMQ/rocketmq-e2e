@@ -81,7 +81,6 @@ public class TransactionMessageTest extends BaseOperate {
         }
     }
 
-    @Disabled
     @Test
     @DisplayName("Send 10 transaction messages and synchronously commit the transaction (Checker performs rollback), expecting those 10 messages to be consumed via PushConsumer")
     public void testTrans_SendCommit_PushConsume() {
@@ -91,8 +90,6 @@ public class TransactionMessageTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQTransProducer(account, topic, new LocalTransactionCheckerImpl(TransactionResolution.ROLLBACK));
         Assertions.assertNotNull(producer);
@@ -104,7 +101,6 @@ public class TransactionMessageTest extends BaseOperate {
         VerifyUtils.verifyNormalMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages());
     }
 
-    @Disabled
     @Test
     @DisplayName("Send 10 transaction messages and rollback directly (Checker does commit), expecting that these 10 messages cannot be consumed by PushConsumer")
     public void testTrans_SendRollback_PushConsume() {
@@ -113,8 +109,6 @@ public class TransactionMessageTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQTransProducer(account, topic, new LocalTransactionCheckerImpl(TransactionResolution.COMMIT));
         Assertions.assertNotNull(producer);
@@ -128,7 +122,6 @@ public class TransactionMessageTest extends BaseOperate {
         Assertions.assertEquals(0, pushConsumer.getListener().getDequeueMessages().getDataSize());
     }
 
-    @Disabled
     @Test
     @DisplayName("Send 10 transaction messages and COMMIT the transaction by Checker (perform COMMIT), expecting the 10 messages to be consumed by PushConsumer")
     public void testTrans_SendCheckerCommit_PushConsume() {
@@ -138,8 +131,6 @@ public class TransactionMessageTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQTransProducer(account, topic, new LocalTransactionCheckerImpl(TransactionResolution.COMMIT));
         Assertions.assertNotNull(producer);
@@ -153,7 +144,6 @@ public class TransactionMessageTest extends BaseOperate {
         VerifyUtils.verifyNormalMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages());
     }
 
-    @Disabled
     @Test
     @DisplayName("Send 10 transaction messages and roll back the transaction by Checker (performing ROLLBACK), expecting that the 10 messages will not be consumed by PushConsumer")
     public void testTrans_CheckerRollback() {
@@ -162,8 +152,6 @@ public class TransactionMessageTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         producer = ProducerFactory.getRMQTransProducer(account, topic, new LocalTransactionCheckerImpl(TransactionResolution.ROLLBACK));
         Assertions.assertNotNull(producer);
@@ -177,7 +165,6 @@ public class TransactionMessageTest extends BaseOperate {
         Assertions.assertEquals(0, pushConsumer.getListener().getDequeueMessages().getDataSize());
     }
 
-    @Disabled
     @Test
     @DisplayName("Send 10 transactional messages and commit them by checking back (Checker commits for partial messages), and the expected committed messages can be consumed by PushConsumer")
     public void testTrans_SendCheckerPartionCommit() {
@@ -187,8 +174,6 @@ public class TransactionMessageTest extends BaseOperate {
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         AtomicInteger commitMsgNum = new AtomicInteger(0);
         AtomicInteger rollbackMsgNum = new AtomicInteger(0);
