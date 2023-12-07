@@ -124,8 +124,6 @@ public class ClusterTest extends BaseOperate {
         pushConsumer02 = ConsumerFactory.getPushConsumer(account, topic, groupId, new FilterExpression(tag), listenerB);
         pushConsumer03 = ConsumerFactory.getPushConsumer(account, topic, groupId, new FilterExpression(tag), listenerC);
 
-        simpleConsumer = ConsumerFactory.getRMQSimpleConsumer(account, topic, groupId, new FilterExpression(tag), Duration.ofSeconds(10));
-        VerifyUtils.tryReceiveOnce(simpleConsumer.getSimpleConsumer());
 
         RMQNormalProducer producer = ProducerFactory.getRMQProducer(account, topic);
         Assertions.assertNotNull(producer, "Get producer failed");
