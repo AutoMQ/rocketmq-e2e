@@ -40,6 +40,7 @@ import org.apache.rocketmq.util.NameUtils;
 import org.apache.rocketmq.util.RandomUtils;
 import org.apache.rocketmq.util.TestUtils;
 import org.apache.rocketmq.util.VerifyUtils;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -139,8 +140,11 @@ public class TransactionMessageTest extends BaseOperate {
             producer.sendTrans(message, null);
         }
         //Wait for the callback to execute commit
-        TestUtils.waitForSeconds(60);
+        TestUtils.waitForSeconds(30);
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
+        Awaitility.await().atMost(Duration.ofSeconds(180)).until(() -> {
+            return pushConsumer.getListener().getDequeueMessages().getDataSize() == SEND_NUM;
+        });
         VerifyUtils.verifyNormalMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages());
     }
 
@@ -195,14 +199,15 @@ public class TransactionMessageTest extends BaseOperate {
             Message message = MessageFactory.buildMessage(topic, tag, String.valueOf(i));
             producer.sendTrans(message, null);
         }
-        await().atMost(120, SECONDS).until(new Callable<Boolean>() {
+        //Wait for the rollback and execute commit/rollback
+        TestUtils.waitForSeconds(60);
+        //Wait for the callback to execute commit
+        await().atMost(180, SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() {
                 return rollbackMsgNum.get() == commitMsgNum.get() && commitMsgNum.get() == SEND_NUM / 2;
             }
         });
-        //Wait for the rollback and execute commit/rollback
-        TestUtils.waitForSeconds(60);
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
         Assertions.assertEquals(5, pushConsumer.getListener().getDequeueMessages().getDataSize());
     }
