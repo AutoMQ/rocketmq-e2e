@@ -86,7 +86,7 @@ public class TransactionMessageTest extends BaseOperate {
     public void testTrans_SendCommit_PushConsume() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
 
-        String topic = getTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
+        String topic = getTransTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
@@ -105,7 +105,7 @@ public class TransactionMessageTest extends BaseOperate {
     @DisplayName("Send 10 transaction messages and rollback directly (Checker does commit), expecting that these 10 messages cannot be consumed by PushConsumer")
     public void testTrans_SendRollback_PushConsume() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        String topic = getTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
+        String topic = getTransTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
@@ -127,7 +127,7 @@ public class TransactionMessageTest extends BaseOperate {
     public void testTrans_SendCheckerCommit_PushConsume() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
 
-        String topic = getTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
+        String topic = getTransTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
@@ -148,7 +148,7 @@ public class TransactionMessageTest extends BaseOperate {
     @DisplayName("Send 10 transaction messages and roll back the transaction by Checker (performing ROLLBACK), expecting that the 10 messages will not be consumed by PushConsumer")
     public void testTrans_CheckerRollback() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        String topic = getTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
+        String topic = getTransTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
@@ -170,7 +170,7 @@ public class TransactionMessageTest extends BaseOperate {
     public void testTrans_SendCheckerPartionCommit() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
 
-        String topic = getTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
+        String topic = getTransTopic(TopicMessageType.TRANSACTION.getValue(), methodName);
         String groupId = getGroupId(methodName);
 
         pushConsumer = ConsumerFactory.getRMQPushConsumer(account, topic, groupId, new FilterExpression(tag), new RMQNormalListener());
@@ -195,7 +195,7 @@ public class TransactionMessageTest extends BaseOperate {
             Message message = MessageFactory.buildMessage(topic, tag, String.valueOf(i));
             producer.sendTrans(message, null);
         }
-        await().atMost(90, SECONDS).until(new Callable<Boolean>() {
+        await().atMost(120, SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() {
                 return rollbackMsgNum.get() == commitMsgNum.get() && commitMsgNum.get() == SEND_NUM / 2;

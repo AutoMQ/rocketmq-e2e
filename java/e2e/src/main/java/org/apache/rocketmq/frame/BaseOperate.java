@@ -97,6 +97,24 @@ public class BaseOperate extends ResourceInit {
         return null;
     }
 
+    protected static String getTransTopic(String messageType, String methodName) {
+        String topic = String.format("topic_%s_%s_%s", messageType, methodName, RandomUtils.getStringWithCharacter(6));
+        log.info("[Topic] topic:{}, messageType:{}, methodName:{}", topic, messageType, methodName);
+        try {
+            CreateTopicRequest request = CreateTopicRequest.newBuilder()
+                .setTopic(topic)
+                .setCount(1)
+                .setAcceptTypes(convertAcceptTypes(messageType))
+                .build();
+            Long topicId = client.createTopic(endPoint, request).join();
+            log.info("create topic: {} , topicId:{}", topic, topicId);
+            return topic;
+        } catch (Exception e) {
+            log.error("create topic error", e);
+        }
+        return null;
+    }
+
     private static AcceptTypes convertAcceptTypes(String typeStr) {
         switch (typeStr) {
             case "NORMAL":
