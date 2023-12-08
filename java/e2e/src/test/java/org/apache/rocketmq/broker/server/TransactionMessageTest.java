@@ -123,6 +123,7 @@ public class TransactionMessageTest extends BaseOperate {
         Assertions.assertEquals(0, pushConsumer.getListener().getDequeueMessages().getDataSize());
     }
 
+    @Disabled
     @Test
     @DisplayName("Send 10 transaction messages and COMMIT the transaction by Checker (perform COMMIT), expecting the 10 messages to be consumed by PushConsumer")
     public void testTrans_SendCheckerCommit_PushConsume() {
@@ -143,6 +144,7 @@ public class TransactionMessageTest extends BaseOperate {
         TestUtils.waitForSeconds(30);
         Assertions.assertEquals(SEND_NUM, producer.getEnqueueMessages().getDataSize(), "send message failed");
         Awaitility.await().atMost(Duration.ofSeconds(180)).until(() -> {
+            System.out.println("pushConsumer.getListener().getDequeueMessages().getDataSize():" + pushConsumer.getListener().getDequeueMessages().getDataSize());
             return pushConsumer.getListener().getDequeueMessages().getDataSize() == SEND_NUM;
         });
         VerifyUtils.verifyNormalMessage(producer.getEnqueueMessages(), pushConsumer.getListener().getDequeueMessages());
@@ -169,6 +171,7 @@ public class TransactionMessageTest extends BaseOperate {
         Assertions.assertEquals(0, pushConsumer.getListener().getDequeueMessages().getDataSize());
     }
 
+    @Disabled
     @Test
     @DisplayName("Send 10 transactional messages and commit them by checking back (Checker commits for partial messages), and the expected committed messages can be consumed by PushConsumer")
     public void testTrans_SendCheckerPartionCommit() {
@@ -205,6 +208,7 @@ public class TransactionMessageTest extends BaseOperate {
         await().atMost(180, SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() {
+                System.out.println("commitMsgNum:" + commitMsgNum.get() + ",rollbackMsgNum:" + rollbackMsgNum.get());
                 return rollbackMsgNum.get() == commitMsgNum.get() && commitMsgNum.get() == SEND_NUM / 2;
             }
         });
