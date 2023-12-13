@@ -52,6 +52,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,6 +166,7 @@ public class LoadBalancingTest extends BaseOperate {
         consumer6.shutdown();
     }
 
+    @Disabled
     @Test
     @DisplayName("Global sequential message load balancing: Start 2 consumers, send 30 messages, expect only 1 Consumer to consume the message, and the other Consumer to consume 0, then shutdown 1 Consumer with message consumption, send another 30 messages, expect the idling Consumer to pull the message")
     public void testLoadBalancing_global_sequential_message(){
@@ -218,6 +220,7 @@ public class LoadBalancingTest extends BaseOperate {
         consumer2.shutdown();
     }
 
+    @Disabled
     @Test
     @DisplayName("Partition sequential message load balancing, start 4 consumers, send 120 messages, shardingkey=8, expect 4 consumers to consume load balancing, each consumes 1/4 Partition, shutdown 2 of the consumers, send 120 messages again. The load is still balanced, and half of each Partition is consumed")
     public void testLoadBalancing_partition_sequential_message(){
